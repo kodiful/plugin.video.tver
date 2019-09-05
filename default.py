@@ -143,8 +143,6 @@ class Browse:
         # 番組検索
         url = 'https://api.tver.jp/v4/search?catchup=1&%s&token=%s' % (self.query, token)
         buf = urlread(url)
-        log(url)
-        log(buf)
         jso = json.loads(buf)
         for data in jso.get('data', []):
             self.__add_item(data)
@@ -155,16 +153,24 @@ class Browse:
         # 番組詳細を取得
         url = self.query
         buf = urlread(url)
-        args = map(lambda x:x.strip(" '\t"), re.search('addPlayer\((.*?)\);', re.sub(r'\n',' ',buf)).group(1).split(','))
+        args = {}
+        keys = ('player_id','player_key','catchup_id','publisher_id','reference_id','title','sub_title','service','service_name','sceneshare_enabled','share_start')
+        vals = map(lambda x:x.strip(" '\t"), re.search('addPlayer\((.*?)\);', re.sub(r'\n',' ',buf)).group(1).split(','))
+        for key, val in zip(keys,vals):
+            args[key] = val
         # ポリシーキーを取得
-        url = 'https://players.brightcove.net/%s/%s_default/index.min.js' % (args[0], args[1])
+        url = 'https://players.brightcove.net/%s/%s_default/index.min.js' % (args['player_id'], args['player_key'])
         buf = urlread(url)
         pk = re.search('a.catalog\(\{accountId:accountId,policyKey:"(.*?)"\}\);', buf).group(1)
         # HLSマスターのURLを取得
-        url = 'https://edge.api.brightcove.com/playback/v1/accounts/%s/videos/ref:%s' % (args[3], args[4])
+        if args['service'] != 'tx' and args['service'] != 'russia2018' and args['service'] != "gorin":
+            ref_id = 'ref:' + args['reference_id']
+        else:
+            ref_id = args['reference_id']
+        url = 'https://edge.api.brightcove.com/playback/v1/accounts/%s/videos/%s' % (args['publisher_id'], ref_id)
         buf = urlread(url, ('Accept','application/json;pk=%s' % pk))
         jso = json.loads(buf)
-        src = jso.get('sources')[4].get('src')
+        src = jso.get('sources')[3].get('src')
         xbmc.executebuiltin('PlayMedia(%s)' % src)
 
     def __add_item(self, data):

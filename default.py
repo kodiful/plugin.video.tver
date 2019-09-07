@@ -144,7 +144,7 @@ class Browse:
         url = 'https://api.tver.jp/v4/search?catchup=1&%s&token=%s' % (self.query, token)
         buf = urlread(url)
         jso = json.loads(buf)
-        for data in jso.get('data', []):
+        for data in sorted(jso.get('data',[]), key=lambda d: (self.__extract_date(d), d.get('media')), reverse=True):
             self.__add_item(data)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
@@ -173,16 +173,37 @@ class Browse:
         src = jso.get('sources')[3].get('src')
         xbmc.executebuiltin('PlayMedia(%s)' % src)
 
+    def __extract_date(self, data):
+        # 現在時刻
+        now = datetime.datetime.now()
+        year0 = now.strftime('%Y')
+        date0 = now.strftime('%m-%d')
+        # 日時を抽出
+        date = '0000-00-00'
+        m = re.match(r'(20[0-9]{2})年', data.get('date').encode('utf-8'))
+        if m:
+            date = '%s-00-00' % (m.group(1))
+        m = re.match(r'([0-9]{1,2})月([0-9]{1,2})日', data.get('date').encode('utf-8'))
+        if m:
+            date1 = '%02d-%02d' % (int(m.group(1)),int(m.group(2)))
+            date = '%04d-%s' % (int(year0)-1 if date1>date0 else int(year0), date1)
+        m = re.match(r'([0-9]{1,2})/([0-9]{1,2})', data.get('date').encode('utf-8'))
+        if m:
+            date1 = '%02d-%02d' % (int(m.group(1)),int(m.group(2)))
+            date = '%04d-%s' % (int(year0) if date1<date0 else int(year0)-1, date1)
+        return date
+
     def __add_item(self, data):
         name = data.get('title')
         url = 'https://tver.jp%s' % data.get('href')
         mode = 16
         image = data.get('images')[0]
+        # 番組情報
         labels = {
             'title': data.get('title'),
             'studio': data.get('media'),
-            'date': data.get('date'),
-            'genre': '%s %s' % (data.get('media'),data.get('date'))
+            'date': self.__extract_date(data),
+            'genre': '%s %s' % (data.get('media'), data.get('date'))
         }
         self.__add_directory_item(name, url, mode, image['small'], labels)
 

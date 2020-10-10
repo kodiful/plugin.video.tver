@@ -151,26 +151,73 @@ class Browse:
 
     def play(self):
         # 番組詳細を取得
+        #
+        # https://tver.jp/episode/77607556
+        #
         url = self.query
         buf = urlread(url)
         args = {}
         keys = ('player_id','player_key','catchup_id','publisher_id','reference_id','title','sub_title','service','service_name','sceneshare_enabled','share_start')
-        vals = map(lambda x:x.strip(" '\t"), re.search('addPlayer\((.*?)\);', re.sub(r'\n',' ',buf)).group(1).split(','))
+        '''
+        function showPlayer(){
+        	if( canPlayMovie() ){
+        				addPlayer(
+        			'4394098882001',
+        			'TtyB0eZ4Y',
+        			'f0058835',
+        			'4394098882001',
+        			'104da7b3-2df3-491a-bab2-5f08793e608a',
+        			'ぶらり途中下車の旅',
+        			' 小田急線',
+        			'ntv',
+        			'日テレ無料',
+        			true,
+        			0
+        		);
+        			}else{
+        		addSpPlayer(
+        			'f0058835',
+        			'ぶらり途中下車の旅',
+        			' 小田急線',
+        			'ntv',
+        			'日テレ無料',
+        			'https%3A%2F%2Ftver.jp%2Fepisode%2F77607556',
+        			'',
+        			'104da7b3-2df3-491a-bab2-5f08793e608a',
+        			0,
+        			''
+        		);
+        	}
+        }
+        '''
+        vals = map(lambda x:x.strip(" '\t"), re.search(r'addPlayer\((.*?)\);', re.sub(r'\n',' ',buf)).group(1).split(','))
         for key, val in zip(keys,vals):
             args[key] = val
         # ポリシーキーを取得
+        #
+        # https://players.brightcove.net/4394098882001/TtyB0eZ4Y_default/index.min.js?_=1602300285436
+        #
         url = 'https://players.brightcove.net/%s/%s_default/index.min.js' % (args['player_id'], args['player_key'])
         buf = urlread(url)
-        pk = re.search('a.catalog\(\{accountId:accountId,policyKey:"(.*?)"\}\);', buf).group(1)
+        #
+        # options:{accountId:"4394098882001",policyKey:"BCpkADawqM1l5pA4XtMLusHj72LGzFewqKZzldpmNYTUQdoKnFL_GHhN3dg5FRnNQ5V7SOUKBl-tYFMt8CpSzuSzFAPhIHtVwmMz6F52VnMfu2UjDmeYfvvUqk0CWon46Yh-CZwIVp5vfXrZ"}
+        #
+        pk = re.search(r'options:\{accountId:"(.*?)",policyKey:"(.*?)"\}', buf).group(2)
         # HLSマスターのURLを取得
         if args['service'] != 'tx' and args['service'] != 'russia2018' and args['service'] != "gorin":
             ref_id = 'ref:' + args['reference_id']
         else:
             ref_id = args['reference_id']
+        #
+        # https://edge.api.brightcove.com/playback/v1/accounts/5102072603001/videos/ref%3Asunday_variety_episode_code_6950
+        #
         url = 'https://edge.api.brightcove.com/playback/v1/accounts/%s/videos/%s' % (args['publisher_id'], ref_id)
         buf = urlread(url, ('Accept','application/json;pk=%s' % pk))
         jso = json.loads(buf)
         src = jso.get('sources')[3].get('src')
+        #
+        # https://manifest.prod.boltdns.net/manifest/v1/hls/v4/aes128/4394098882001/15157782-1259-4ba1-b9e6-ee7298b261f6/10s/master.m3u8?fastly_token=NWZhNjY1MTVfNGIyZjQzZDc0ZTg0YmY3NTg0OTE1YThjOGQzZjk2NDk5NTcyMzU4N2ViYzFiZDY2NDBjN2QwZWMxNTIwYjZmNw%3D%3D
+        #
         xbmc.executebuiltin('PlayMedia(%s)' % src)
 
     def __extract_date(self, data):

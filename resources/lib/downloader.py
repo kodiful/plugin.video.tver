@@ -37,16 +37,17 @@ class Downloader:
             url = 'plugin://%s?action=list&addonid=%s' % (self.remote_id, self.local_id)
             xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, True)
 
-    def menu(self, item):
+    def contextmenu(self, item):
+        menu = []
         if self.__available():
             filename = item.get('filename', '')
             if self.__exists(filename):
                 action = 'RunPlugin(plugin://%s?action=delete&addonid=%s&filename=%s)' % (self.remote_id, self.local_id, urllib.quote_plus(filename))
-                menu = (self.remote_addon.getLocalizedString(30930), action)
+                menu = [(self.remote_addon.getLocalizedString(30930), action)]
             else:
                 action = 'RunPlugin(plugin://%s?action=download&%s)' % (self.local_id, urllib.urlencode(item))
-                menu = (self.remote_addon.getLocalizedString(30929), action)
-            return menu
+                menu = [(self.remote_addon.getLocalizedString(30929), action)]
+        return menu
 
     def download(self, item, url):
         if self.__available():

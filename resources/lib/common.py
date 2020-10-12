@@ -1,14 +1,29 @@
 # -*- coding: utf-8 -*-
 
-import socket
 import urllib2
 import os
 import inspect
 import xbmc
 import xbmcaddon
 
-# HTTP接続におけるタイムアウト(秒)
-socket.setdefaulttimeout(60)
+
+class Const:
+
+    ADDON = xbmcaddon.Addon()
+    STR = ADDON.getLocalizedString
+
+    # ディレクトリパス
+    PROFILE_PATH = xbmc.translatePath(ADDON.getAddonInfo('profile'))
+    PLUGIN_PATH = xbmc.translatePath(ADDON.getAddonInfo('path'))
+    RESOURCES_PATH = os.path.join(PLUGIN_PATH, 'resources')
+    DATA_PATH = os.path.join(RESOURCES_PATH, 'data')
+    IMAGE_PATH = os.path.join(DATA_PATH, 'image')
+
+    # サムネイル
+    CALENDAR    = os.path.join(IMAGE_PATH, 'icons8-calendar-filled-500.png')
+    RADIO_TOWER = os.path.join(IMAGE_PATH, 'icons8-radio-tower-filled-500.png')
+    CATEGORIZE  = os.path.join(IMAGE_PATH, 'icons8-categorize-filled-500.png')
+
 
 def urlread(url, *headers):
     opener = urllib2.build_opener()

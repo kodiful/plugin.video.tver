@@ -18,15 +18,15 @@ def urlread(url, *headers):
     opener.addheaders = h
     try:
         response = opener.open(url)
-        buffer = response.read()
+        buf = response.read()
         response.close()
     except urllib2.HTTPError, e:
         log('HTTPError: url=', url, error=True)
         log('HTTPError: code=', e.code, error=True)
         log('HTTPError: reason=', e.reason, error=True)
         log('HTTPError: read=', e.read(), error=True)
-        buffer = ''
-    return buffer
+        buf = ''
+    return buf.encode('utf-8') if isinstance(buf,unicode) else buf
 
 def notify(message, **options):
     addon = xbmcaddon.Addon()

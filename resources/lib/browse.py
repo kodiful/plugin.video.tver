@@ -37,7 +37,7 @@ class Browse:
 
     def show_top(self):
         # ダウンロード
-        self.downloader.top()
+        self.downloader.top(Const.DOWNLOADS)
         # 検索:日付
         self.__add_directory_item(Const.STR(30933),'','setdate',thumbnail=Const.CALENDAR,context='top')
         # 検索:チャンネル
@@ -296,11 +296,9 @@ class Browse:
         return date, startdate
 
     def __set_filename(self, item):
-        title = item.get('title')
-        media = item.get('media')
-        date, _ = self.__extract_date(item)
-        filename = '%s,%s,%s' % (media, date, title)
-        filename = re.sub(r'[\x20-\x2b\x2f\x3a-\x3f\x5b-\x5e\x60\x7b-\x7f]', '_', filename)
+        publisher_id = item.get('publisher_id')
+        reference_id = item.get('reference_id')
+        filename = '%s.%s' % (publisher_id, reference_id)
         return filename
 
     def __add_item(self, item, images):
@@ -313,6 +311,7 @@ class Browse:
         item.update({
             # misc
             'url': 'https://tver.jp%s' % item.get('href'),
+            'image': image,
             'filename': filename,
             'date': date,
             # labels

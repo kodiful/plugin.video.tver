@@ -20,6 +20,7 @@ class Const:
     IMAGE_PATH = os.path.join(DATA_PATH, 'image')
 
     # サムネイル
+    DOWNLOADS   = os.path.join(IMAGE_PATH, 'icons8-downloads-folder-filled-500.png')
     CALENDAR    = os.path.join(IMAGE_PATH, 'icons8-calendar-filled-500.png')
     RADIO_TOWER = os.path.join(IMAGE_PATH, 'icons8-radio-tower-filled-500.png')
     CATEGORIZE  = os.path.join(IMAGE_PATH, 'icons8-categorize-filled-500.png')

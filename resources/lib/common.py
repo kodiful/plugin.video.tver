@@ -17,13 +17,13 @@ class Const:
     PLUGIN_PATH = xbmc.translatePath(ADDON.getAddonInfo('path'))
     RESOURCES_PATH = os.path.join(PLUGIN_PATH, 'resources')
     DATA_PATH = os.path.join(RESOURCES_PATH, 'data')
-    IMAGE_PATH = os.path.join(DATA_PATH, 'image')
+    IMAGES_PATH = os.path.join(DATA_PATH, 'images')
 
     # サムネイル
-    DOWNLOADS   = os.path.join(IMAGE_PATH, 'icons8-downloads-folder-filled-500.png')
-    CALENDAR    = os.path.join(IMAGE_PATH, 'icons8-calendar-filled-500.png')
-    RADIO_TOWER = os.path.join(IMAGE_PATH, 'icons8-radio-tower-filled-500.png')
-    CATEGORIZE  = os.path.join(IMAGE_PATH, 'icons8-categorize-filled-500.png')
+    DOWNLOADS   = os.path.join(IMAGES_PATH, 'icons8-downloads-folder-filled-500.png')
+    CALENDAR    = os.path.join(IMAGES_PATH, 'icons8-calendar-filled-500.png')
+    RADIO_TOWER = os.path.join(IMAGES_PATH, 'icons8-radio-tower-filled-500.png')
+    CATEGORIZE  = os.path.join(IMAGES_PATH, 'icons8-categorize-filled-500.png')
 
 
 def urlread(url, *headers):

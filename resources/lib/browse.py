@@ -295,24 +295,24 @@ class Browse:
                 startdate = ''
         return date, startdate
 
-    def __set_filename(self, item):
+    def __set_contentid(self, item):
         publisher_id = item.get('publisher_id')
         reference_id = item.get('reference_id')
-        filename = '%s.%s' % (publisher_id, reference_id)
-        return filename
+        contentid = '%s.%s' % (publisher_id, reference_id)
+        return contentid
 
     def __add_item(self, item, images):
         name = item.get('title')
         action = 'play'
         image = images[0]['small']
         date, startdate = self.__extract_date(item)
-        filename = self.__set_filename(item)
+        contentid = self.__set_contentid(item)
         # 番組情報
         item.update({
             # misc
             'url': 'https://tver.jp%s' % item.get('href'),
             'image': image,
-            'filename': filename,
+            'contentid': contentid,
             'date': date,
             # labels
             'title': item.get('title', ''),

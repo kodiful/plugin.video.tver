@@ -24,8 +24,8 @@ class Downloader:
     def __available(self):
         return self.remote_addon is not None
 
-    def __exists(self, filename):
-        filepath = os.path.join(self.download_path, self.local_id, '%s.mp4' % filename)
+    def __exists(self, contentid):
+        filepath = os.path.join(self.download_path, self.local_id, '%s.mp4' % contentid)
         return os.path.isfile(filepath)
 
     def top(self, icon_image=None):
@@ -38,9 +38,9 @@ class Downloader:
     def contextmenu(self, item, url=None):
         contextmenu = []
         if self.__available():
-            filename = item.get('filename', '')
-            if self.__exists(filename):
-                action = 'RunPlugin(plugin://%s?action=delete&addonid=%s&filename=%s)' % (self.remote_id, self.local_id, urllib.quote_plus(filename))
+            contentid = item.get('contentid', '')
+            if self.__exists(contentid):
+                action = 'RunPlugin(plugin://%s?action=delete&addonid=%s&contentid=%s)' % (self.remote_id, self.local_id, urllib.quote_plus(contentid))
                 contextmenu = [(self.remote_addon.getLocalizedString(30930), action)]
             else:
                 if url is None:

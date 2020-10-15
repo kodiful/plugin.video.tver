@@ -135,52 +135,59 @@ class Browse:
         # 番組検索
         url = 'https://api.tver.jp/v4/search?catchup=1&%s&token=%s' % (self.query, token)
         buf = urlread(url)
-        '''
-        bool:
-            cast: 1
-            is_new: 1
-        catchup_id: "f0058835"
-        date: "10月10日(土)放送分"
-        expire: "終了まで1週間以上"
-        ext:
-            adconfigid: null
-            allow_scene_share: true
-            catch: ""
-            is_caption: false
-            live_lb_type: null
-            multiple_catchup: false
-            share_secret: "c4f32c346c8a6a275706971a5fd9b2be"
-            site_catch: ""
-            stream_id: null
-            yospace_id: null
-        href: "/episode/77607556"
-        images:
-            image: "https://api-cdn.tver.jp/s3/@202010/image/@20201009/2dda5d15-8efa-4154-8bed-b25df42c8916.jpg"
-            large: "https://api-cdn.tver.jp/s3/@202010/large/@20201009/d9fbf83c-d2b9-4a02-91a1-80a2617f821b.jpg"
-            right: "(C)NTV"
-            small: "https://api-cdn.tver.jp/s3/@202010/small/@20201009/873b890e-ccab-4604-b788-e1e2f4c100f4.jpg"
-            type: "e_cut"
-        media: "日テレ"
-        mylist_id: "c0001449"
-        player: "videocloud"
-        pos: "/search"
-        publisher_id: "4394098882001"
-        reference_id: "104da7b3-2df3-491a-bab2-5f08793e608a"
-        service: "ts_ntv"
-        subtitle: "小田急線"
-        title: "ぶらり途中下車の旅"
-        type: "catchup"
-        url: "http://www.ntv.co.jp/burari/"
-        '''
-        for data in json.loads(buf).get('data',[]):
+        datalist = json.loads(buf).get('data',[])
+        for data in sorted(datalist, key=lambda item: self.__extract_date(item), reverse=True):
+            '''
+            {
+                "bool": {
+                    "cast": 1
+                },
+                "catchup_id": "f0058710",
+                "date": "7月14日(火)放送分",
+                "expire": "10月21日(水) 00:53 終了予定",
+                "ext": {
+                    "adconfigid": null,
+                    "allow_scene_share": true,
+                    "catch": "",
+                    "episode_number": "598",
+                    "is_caption": false,
+                    "live_lb_type": null,
+                    "multiple_catchup": false,
+                    "share_secret": "c950d127003629617cc5fffbcbde3c95",
+                    "site_catch": "",
+                    "stream_id": null,
+                    "yospace_id": null
+                },
+                "href": "/feature/f0058710",
+                "images": [
+                    {
+                        "image": "https://api-cdn.tver.jp/s3/@202010/image/@20201007/638c1baf-3a27-47f2-92f0-54038255ab77.jpg",
+                        "large": "https://api-cdn.tver.jp/s3/@202010/large/@20201007/2444cd40-0558-4d18-923a-3496745ebbf0.jpg",
+                        "right": "(C) ytv",
+                        "small": "https://api-cdn.tver.jp/s3/@202010/small/@20201007/07009320-8d91-4308-85c4-7277758f03b3.jpg",
+                        "type": "e_cut"
+                    }
+                ],
+                "media": "読売テレビ",
+                "mylist_id": "f0009802",
+                "player": "videocloud",
+                "pos": "/search",
+                "publisher_id": "5330942432001",
+                "reference_id": "Niketsu_598_200715",
+                "service": "ts_ytv",
+                "subtitle": "ジュニア衝撃ぬるいカップ麺＆芸人名言",
+                "title": "にけつッ!!",
+                "type": "catchup",
+                "url": "http://www.ytv.co.jp/niketsu/"
+            }
+            '''
+            # 文字列値をすべてコピー
             item = {}
-            images = []
             for key, val in data.items():
                 if isinstance(val, unicode):
-                    item[key.encode('utf-8')] = val.encode('utf-8')
-                if key == 'images':
-                    images = val
-            self.__add_item(item, images)
+                    item[key] = val.encode('utf-8')
+            # 表示
+            self.__add_item(item, data['images'])
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -204,7 +211,7 @@ class Browse:
         '''
         function showPlayer(){
         	if( canPlayMovie() ){
-        				addPlayer(
+        		addPlayer(
         			'4394098882001',
         			'TtyB0eZ4Y',
         			'f0058835',
@@ -217,7 +224,7 @@ class Browse:
         			true,
         			0
         		);
-        			}else{
+        	}else{
         		addSpPlayer(
         			'f0058835',
         			'ぶらり途中下車の旅',
@@ -264,20 +271,23 @@ class Browse:
         return src
 
     def __extract_date(self, item):
+        # データの時刻情報
+        itemdate = item.get('date', '')
+        if isinstance(itemdate, unicode): itemdate = itemdate.encode('utf-8')
         # 現在時刻
         now = datetime.datetime.now()
         year0 = now.strftime('%Y')
         date0 = now.strftime('%m-%d')
         # 日時を抽出
         date = '0000-00-00'
-        m = re.match(r'(20[0-9]{2})年', item.get('date'))
+        m = re.match(r'(20[0-9]{2})年', itemdate)
         if m:
             date = '%s-00-00' % (m.group(1))
-        m = re.match(r'([0-9]{1,2})月([0-9]{1,2})日', item.get('date'))
+        m = re.match(r'([0-9]{1,2})月([0-9]{1,2})日', itemdate)
         if m:
             date1 = '%02d-%02d' % (int(m.group(1)),int(m.group(2)))
             date = '%04d-%s' % (int(year0)-1 if date1>date0 else int(year0), date1)
-        m = re.match(r'([0-9]{1,2})/([0-9]{1,2})', item.get('date'))
+        m = re.match(r'([0-9]{1,2})/([0-9]{1,2})', itemdate)
         if m:
             date1 = '%02d-%02d' % (int(m.group(1)),int(m.group(2)))
             date = '%04d-%s' % (int(year0) if date1<date0 else int(year0)-1, date1)
@@ -293,6 +303,8 @@ class Browse:
                 startdate = startdate.strftime('%a, %d %b %Y %H:%M:%S +0900')
             except ValueError:
                 startdate = ''
+        except ValueError:
+            startdate = ''
         return date, startdate
 
     def __set_contentid(self, item):
@@ -309,16 +321,18 @@ class Browse:
         contentid = self.__set_contentid(item)
         # 番組情報
         item.update({
-            # misc
             'url': 'https://tver.jp%s' % item.get('href'),
             'image': image,
             'contentid': contentid,
-            'date': date,
-            # labels
+            # for kodi labels
             'title': item.get('title', ''),
+            'plot': '%s\n%s' % (date, item.get('subtitle', '')),
+            'plotoutline': item.get('subtitle', ''),
             'studio': item.get('media', ''),
             'genre': '',
-            # rss
+            'date': date,
+            'duration': '',
+            # for rss
             'title': item.get('title', ''),
             'description': item.get('subtitle', ''),
             'startdate': startdate,

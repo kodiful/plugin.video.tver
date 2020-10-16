@@ -2,11 +2,11 @@
 
 import sys
 import xbmc, xbmcaddon
-import socket
 
 from resources.lib.browse import Browse
 
 # HTTP接続におけるタイムアウト(秒)
+import socket
 socket.setdefaulttimeout(60)
 
 
@@ -15,23 +15,23 @@ if __name__  == '__main__':
     # 引数
     args, _ = Browse().update_query(sys.argv[2][1:])
     action = args.get('action', '')
-    query = args.get('query',  '')
+    query = args.get('query', '')
 
     # top
     if action == '':
-        Browse().show('top')
+        Browse().show_top()
 
     # select date
     elif action == 'setdate':
-        Browse(query).show('date')
+        Browse(query).show_date()
 
     # select channel
     elif action == 'setchannel':
-        Browse(query).show('channel')
+        Browse(query).show_channel()
 
     # select genre
     elif action == 'setgenre':
-        Browse(query).show('genre')
+        Browse(query).show_genre()
 
     # search
     elif action == 'search':

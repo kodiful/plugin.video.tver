@@ -25,16 +25,6 @@ class Browse:
         args.update(values or {})
         return args, urllib.urlencode(args)
 
-    def show(self, action):
-        if action == 'top':
-            self.show_top()
-        elif action == 'date':
-            self.show_date()
-        elif action == 'channel':
-            self.show_channel()
-        elif action == 'genre':
-            self.show_genre()
-
     def show_top(self):
         # ダウンロード
         self.downloader.top(Const.DOWNLOADS)
@@ -291,23 +281,9 @@ class Browse:
         if m:
             date1 = '%02d-%02d' % (int(m.group(1)),int(m.group(2)))
             date = '%04d-%s' % (int(year0) if date1<date0 else int(year0)-1, date1)
-        # startdate
-        #startdate = datetime.datetime.strptime(p['startdate'],'%Y-%m-%d %H:%M:%S').strftime('%a, %d %b %Y %H:%M:%S +0000')
-        #http://forum.kodi.tv/showthread.php?tid=203759
-        try:
-            startdate = datetime.datetime.strptime('%s 00:00:00' % date,'%Y-%m-%d %H:%M:%S')
-            startdate = startdate.strftime('%a, %d %b %Y %H:%M:%S +0900')
-        except TypeError:
-            try:
-                startdate = datetime.datetime.fromtimestamp(time.mktime(time.strptime('%s 00:00:00' % date,'%Y-%m-%d %H:%M:%S')))
-                startdate = startdate.strftime('%a, %d %b %Y %H:%M:%S +0900')
-            except ValueError:
-                startdate = ''
-        except ValueError:
-            startdate = ''
-        return date, startdate
+        return date
 
-    def __set_contentid(self, item):
+    def __contentid(self, item):
         publisher_id = item.get('publisher_id')
         reference_id = item.get('reference_id')
         contentid = '%s.%s' % (publisher_id, reference_id)
@@ -317,8 +293,8 @@ class Browse:
         name = item.get('title')
         action = 'play'
         image = images[0]['small']
-        date, startdate = self.__extract_date(item)
-        contentid = self.__set_contentid(item)
+        date = self.__extract_date(item)
+        contentid = self.__contentid(item)
         # 番組情報
         item.update({
             'url': 'https://tver.jp%s' % item.get('href'),
@@ -335,9 +311,10 @@ class Browse:
             # for rss
             'title': item.get('title', ''),
             'description': item.get('subtitle', ''),
-            'startdate': startdate,
-            'bc': item.get('media', ''),
-            'thumb': image,
+            'category': '',
+            'source': item.get('media', ''),
+            'author': item.get('media', ''),
+            'thumbnail': image,
             'duration': '',
         })
         # add directory item

@@ -32,6 +32,9 @@ class Downloader:
         if self.__available():
             listitem = xbmcgui.ListItem(self.remote_addon.getLocalizedString(30927), iconImage=icon_image, thumbnailImage=icon_image)
             listitem.setInfo(type='video', infoLabels={})
+            action = 'RunPlugin(plugin://%s?action=settings)' % (self.remote_id)
+            contextmenu = [(self.remote_addon.getLocalizedString(30937), action)]
+            listitem.addContextMenuItems(contextmenu, replaceItems=True)
             url = 'plugin://%s?action=list&addonid=%s' % (self.remote_id, self.local_id)
             xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, True)
 

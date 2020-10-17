@@ -289,19 +289,19 @@ class Browse:
         return date
 
     def __contentid(self, item):
-        publisher_id = item.get('publisher_id')
-        reference_id = item.get('reference_id')
+        publisher_id = item.get('publisher_id', 'unknown_publisher_id')
+        reference_id = item.get('reference_id', 'unknown_reference_id')
         contentid = '%s.%s' % (publisher_id, reference_id)
         return contentid
 
     def __add_item(self, item):
         # 番組情報を付加
         s = item['_summary'] = {
-            'title': item['title'],
+            'title': item.get('title','n/a'),
             'url': 'https://tver.jp%s' % item['href'],
             'date': self.__date(item),
-            'description': item['subtitle'],
-            'source': item['media'],
+            'description': item('subtitle',''),
+            'source': item('media','n/a'),
             'category': '',
             'duration': '',
             'thumbnail': item['images'][0]['small'],

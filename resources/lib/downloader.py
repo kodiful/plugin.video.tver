@@ -42,9 +42,10 @@ class Downloader:
                 f.write(json_data)
         return json_file
 
-    def top(self, icon_image=None):
+    def top(self, iconimage=None):
         if self.__available():
-            listitem = xbmcgui.ListItem(self.remote_addon.getLocalizedString(30927), iconImage=icon_image, thumbnailImage=icon_image)
+            listitem = xbmcgui.ListItem(self.remote_addon.getLocalizedString(30927))
+            listitem.setArt({'icon':iconimage})
             listitem.setInfo(type='video', infoLabels={})
             action = 'RunPlugin(plugin://%s?action=settings)' % (self.remote_id)
             contextmenu = [(self.remote_addon.getLocalizedString(30937), action)]

@@ -7,7 +7,7 @@ import urllib, urlparse
 import json
 import xbmc, xbmcgui, xbmcplugin
 
-from common import Const, urlread, log, notify, isholiday
+from common import *
 from downloader import Downloader
 
 
@@ -126,7 +126,7 @@ class Browse:
         url = 'https://api.tver.jp/v4/search?catchup=1&%s&token=%s' % (self.query, token)
         buf = urlread(url)
         datalist = json.loads(buf).get('data',[])
-        for data in sorted(datalist, key=lambda item: self.__extract_date(item), reverse=True):
+        for data in sorted(datalist, key=lambda item: self.__date(item)[0], reverse=True):
             '''
             {
                 "bool": {
@@ -171,13 +171,8 @@ class Browse:
                 "url": "http://www.ytv.co.jp/niketsu/"
             }
             '''
-            # 文字列値をすべてコピー
-            item = {}
-            for key, val in data.items():
-                if isinstance(val, unicode):
-                    item[key] = val.encode('utf-8')
             # 表示
-            self.__add_item(item, data['images'])
+            self.__add_item(convert(data))
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -194,7 +189,7 @@ class Browse:
         #
         # https://tver.jp/episode/77607556
         #
-        url = item.get('url')
+        url = item['_summary']['url']
         buf = urlread(url)
         args = {}
         keys = ('player_id','player_key','catchup_id','publisher_id','reference_id','title','sub_title','service','service_name','sceneshare_enabled','share_start')
@@ -260,7 +255,7 @@ class Browse:
         #
         return src
 
-    def __extract_date(self, item):
+    def __date(self, item):
         # データの時刻情報
         itemdate = item.get('date', '')
         if isinstance(itemdate, unicode): itemdate = itemdate.encode('utf-8')
@@ -281,6 +276,14 @@ class Browse:
         if m:
             date1 = '%02d-%02d' % (int(m.group(1)),int(m.group(2)))
             date = '%04d-%s' % (int(year0) if date1<date0 else int(year0)-1, date1)
+        # 抽出結果
+        return date
+
+    def __date2label(self, date):
+        # listitem.date用に変換
+        m = re.search('^([0-9]{4})-([0-9]{2})-([0-9]{2})', date)
+        if m:
+            date = '%s.%s.%s' % (m.group(3),m.group(2),m.group(1))
         return date
 
     def __contentid(self, item):
@@ -289,41 +292,41 @@ class Browse:
         contentid = '%s.%s' % (publisher_id, reference_id)
         return contentid
 
-    def __add_item(self, item, images):
+    def __add_item(self, item):
         name = item.get('title')
         action = 'play'
-        image = images[0]['small']
-        date = self.__extract_date(item)
-        contentid = self.__contentid(item)
+        thumbnail = item['images'][0]['small']
         # 番組情報
-        item.update({
-            'url': 'https://tver.jp%s' % item.get('href'),
-            'image': image,
-            'contentid': contentid,
-            # for kodi labels
-            'title': item.get('title', ''),
-            'plot': '%s\n%s' % (date, item.get('subtitle', '')),
-            'plotoutline': item.get('subtitle', ''),
-            'studio': item.get('media', ''),
-            'genre': '',
-            'date': date,
-            'duration': '',
-            # for rss
-            'title': item.get('title', ''),
-            'description': item.get('subtitle', ''),
+        item['_summary'] = {
+            'title': item['title'],
+            'url': 'https://tver.jp%s' % item['href'],
+            'date': self.__date(item),
+            'description': item['subtitle'],
+            'source': item['media'],
             'category': '',
-            'source': item.get('media', ''),
-            'author': item.get('media', ''),
-            'thumbnail': image,
             'duration': '',
-        })
+            'thumbnail': item['images'][0]['small'],
+            'thumbfile': '',
+            'contentid': self.__contentid(item),
+        }
         # add directory item
-        self.__add_directory_item(name, '', action, image, item)
+        self.__add_directory_item(name, '', action, thumbnail, item)
 
     def __add_directory_item(self, name, query, action, thumbnail='', item=None, context=None):
         # listitem
         listitem = xbmcgui.ListItem(name, iconImage=thumbnail, thumbnailImage=thumbnail)
-        listitem.setInfo(type='video', infoLabels=item or {})
+        if item:
+            s = item['_summary']
+            labels = {
+                'title': s['title'],
+                'plot': '%s\n%s' % (s['date'], s['description']),
+                'plotoutline': s['description'],
+                'studio': s['source'],
+                'date': self.__date2label(s['date']),
+            }
+            listitem.setInfo(type='video', infoLabels=labels)
+        else:
+            listitem.setInfo(type='video', infoLabels={})
         # context menu
         contextmenu = []
         if context != 'top':
@@ -333,8 +336,9 @@ class Browse:
         contextmenu += [(Const.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])] # アドオン設定
         listitem.addContextMenuItems(contextmenu, replaceItems=True)
         # add directory item
-        if item is not None:
-            url = '%s?action=%s&query=%s&%s' % (sys.argv[0], action, urllib.quote_plus(query), urllib.urlencode(item))
+        if item:
+            dumps = json.dumps(item)
+            url = '%s?action=%s&query=%s&json=%s' % (sys.argv[0], action, urllib.quote_plus(query), urllib.quote_plus(dumps))
         else:
             url = '%s?action=%s&query=%s' % (sys.argv[0], action, urllib.quote_plus(query))
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, True)

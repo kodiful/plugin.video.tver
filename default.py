@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import json
 import xbmc, xbmcaddon
 
+from resources.lib.common import convert, log, notify
 from resources.lib.browse import Browse
 
 # HTTP接続におけるタイムアウト(秒)
@@ -39,11 +41,13 @@ if __name__  == '__main__':
 
     # play
     elif action == 'play':
-        Browse().play(args)
+        item = convert(json.loads(args['json']))
+        Browse().play(item)
 
     # download
     elif action == 'download':
-        Browse().download(args)
+        item = convert(json.loads(args['json']))
+        Browse().download(item)
 
     # open settings
     elif action == 'settings':

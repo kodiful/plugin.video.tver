@@ -2,6 +2,7 @@
 
 import sys
 import os
+import json
 import urllib
 import xbmc, xbmcaddon, xbmcgui, xbmcplugin
 
@@ -19,7 +20,6 @@ class Downloader:
             self.remote_id = None
             self.remote_addon = None
             self.download_path = None
-        return
 
     def __available(self):
         return self.remote_addon is not None
@@ -46,14 +46,16 @@ class Downloader:
                 action = 'RunPlugin(plugin://%s?action=delete&addonid=%s&contentid=%s)' % (self.remote_id, self.local_id, urllib.quote_plus(contentid))
                 contextmenu = [(self.remote_addon.getLocalizedString(30930), action)]
             else:
+                dumps = json.dumps(item)
                 if url is None:
-                    action = 'RunPlugin(plugin://%s?action=download&%s)' % (self.local_id, urllib.urlencode(item))
+                    action = 'RunPlugin(plugin://%s?action=download&json=%s)' % (self.local_id, urllib.quote_plus(dumps))
                 else:
-                    action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&%s)' % (self.remote_id, self.local_id,  urllib.quote_plus(url),  urllib.urlencode(item))
+                    action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id,  urllib.quote_plus(url), urllib.quote_plus(dumps))
                 contextmenu = [(self.remote_addon.getLocalizedString(30929), action)]
         return contextmenu
 
     def download(self, item, url):
         if self.__available():
-            action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&%s)' % (self.remote_id, self.local_id,  urllib.quote_plus(url),  urllib.urlencode(item))
+            dumps = json.dumps(item)
+            action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id,  urllib.quote_plus(url),  urllib.quote_plus(dumps))
             xbmc.executebuiltin(action)

@@ -25,6 +25,18 @@ class Const:
     RADIO_TOWER = os.path.join(IMAGES_PATH, 'icons8-radio-tower-filled-500.png')
     CATEGORIZE  = os.path.join(IMAGES_PATH, 'icons8-categorize-filled-500.png')
 
+def convert(obj):
+    if isinstance(obj, dict):
+        obj1 = {}
+        for key, val in obj.items():
+            obj1[key.encode('utf-8')] = convert(val)
+        return obj1
+    elif isinstance(obj, list):
+        return map(lambda x: convert(x), obj)
+    elif isinstance(obj, unicode):
+        return obj.encode('utf-8')
+    else:
+        return obj
 
 def urlread(url, *headers):
     opener = urllib2.build_opener()

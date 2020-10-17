@@ -29,11 +29,11 @@ class Browse:
         # ダウンロード
         self.downloader.top(Const.DOWNLOADS)
         # 検索:日付
-        self.__add_directory_item(Const.STR(30933),'','setdate',thumbnail=Const.CALENDAR,context='top')
+        self.__add_directory_item(name=Const.STR(30933), query='', action='setdate', thumbnail=Const.CALENDAR)
         # 検索:チャンネル
-        self.__add_directory_item(Const.STR(30934),'','setchannel',thumbnail=Const.RADIO_TOWER,context='top')
+        self.__add_directory_item(name=Const.STR(30934), query='', action='setchannel', thumbnail=Const.RADIO_TOWER)
         # 検索:ジャンル
-        self.__add_directory_item(Const.STR(30935),'','setgenre',thumbnail=Const.CATEGORIZE,context='top')
+        self.__add_directory_item(name=Const.STR(30935), query='', action='setgenre', thumbnail=Const.CATEGORIZE)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -50,7 +50,7 @@ class Browse:
         else:
             action = 'search'
         _, query = self.update_query(self.query, {'date':''})
-        self.__add_directory_item(name, query, action, thumbnail=Const.CALENDAR, context='date')
+        self.__add_directory_item(name, query, action, thumbnail=Const.CALENDAR)
         # 直近30日分のメニューを追加
         for i in range(30):
             d = datetime.date.today() - datetime.timedelta(i)
@@ -66,7 +66,7 @@ class Browse:
             else:
                 name = date1
             _, query = self.update_query(self.query, {'date':date2})
-            self.__add_directory_item(name, query, action, thumbnail=Const.CALENDAR, context='date')
+            self.__add_directory_item(name, query, action, thumbnail=Const.CALENDAR)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -89,7 +89,7 @@ class Browse:
             else:
                 action = 'search'
             _, query = self.update_query(self.query, {'bc':id})
-            self.__add_directory_item(name, query, action, thumbnail=Const.RADIO_TOWER, context='channel')
+            self.__add_directory_item(name, query, action, thumbnail=Const.RADIO_TOWER)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -112,7 +112,7 @@ class Browse:
             else:
                 action = 'search'
             _, query = self.update_query(self.query, {'genre':id})
-            self.__add_directory_item(name, query, action, thumbnail=Const.CATEGORIZE, context='genre')
+            self.__add_directory_item(name, query, action, thumbnail=Const.CATEGORIZE)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -127,7 +127,7 @@ class Browse:
         buf = urlread(url)
         datalist = json.loads(buf).get('data',[])
         datadict = {}
-        for data in sorted(datalist, key=lambda item: self.__date(item)[0], reverse=True):
+        for data in sorted(datalist, key=lambda item: self.__date(item), reverse=True):
             '''
             {
                 "bool": {
@@ -295,11 +295,8 @@ class Browse:
         return contentid
 
     def __add_item(self, item):
-        name = item.get('title')
-        action = 'play'
-        thumbnail = item['images'][0]['small']
-        # 番組情報
-        item['_summary'] = {
+        # 番組情報を付加
+        s = item['_summary'] = {
             'title': item['title'],
             'url': 'https://tver.jp%s' % item['href'],
             'date': self.__date(item),
@@ -311,36 +308,36 @@ class Browse:
             'thumbfile': '',
             'contentid': self.__contentid(item),
         }
-        # add directory item
-        self.__add_directory_item(name, '', action, thumbnail, item)
-
-    def __add_directory_item(self, name, query, action, thumbnail='', item=None, context=None):
         # listitem
-        listitem = xbmcgui.ListItem(name, iconImage=thumbnail, thumbnailImage=thumbnail)
-        if item:
-            s = item['_summary']
-            labels = {
-                'title': s['title'],
-                'plot': '%s\n%s' % (s['date'], s['description']),
-                'plotoutline': s['description'],
-                'studio': s['source'],
-                'date': self.__labeldate(s['date']),
-            }
-            listitem.setInfo(type='video', infoLabels=labels)
-        else:
-            listitem.setInfo(type='video', infoLabels={})
+        listitem = xbmcgui.ListItem(item['title'], iconImage=item['images'][0]['small'], thumbnailImage=item['images'][0]['small'])
+        labels = {
+            'title': s['title'],
+            'plot': '%s\n%s' % (s['date'], s['description']),
+            'plotoutline': s['description'],
+            'studio': s['source'],
+            'date': self.__labeldate(s['date']),
+        }
+        listitem.setInfo(type='video', infoLabels=labels)
+        listitem.setProperty('IsPlayable', 'true')
         # context menu
         contextmenu = []
-        if context != 'top':
-            contextmenu += [(Const.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])] # トップに戻る
-        if context is None:
-            contextmenu += self.downloader.contextmenu(item) # ダウンロード
+        contextmenu += [(Const.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])] # トップに戻る
+        contextmenu += self.downloader.contextmenu(item) # ダウンロード
         contextmenu += [(Const.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])] # アドオン設定
         listitem.addContextMenuItems(contextmenu, replaceItems=True)
         # add directory item
-        if item:
-            dumps = json.dumps(item)
-            url = '%s?action=%s&query=%s&json=%s' % (sys.argv[0], action, urllib.quote_plus(query), urllib.quote_plus(dumps))
-        else:
-            url = '%s?action=%s&query=%s' % (sys.argv[0], action, urllib.quote_plus(query))
+        url = '%s?action=%s&url=%s' % (sys.argv[0], 'play', urllib.quote_plus(s['url']))
+        xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, False)
+
+    def __add_directory_item(self, name, query, action, thumbnail=''):
+        # listitem
+        listitem = xbmcgui.ListItem(name, iconImage=thumbnail, thumbnailImage=thumbnail)
+        # context menu
+        contextmenu = []
+        if query:
+            contextmenu += [(Const.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])] # トップに戻る
+        contextmenu += [(Const.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])] # アドオン設定
+        listitem.addContextMenuItems(contextmenu, replaceItems=True)
+        # add directory item
+        url = '%s?action=%s&query=%s' % (sys.argv[0], action, urllib.quote_plus(query))
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, True)

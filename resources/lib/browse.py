@@ -322,7 +322,7 @@ class Browse:
         listitem.setProperty('IsPlayable', 'true')
         # context menu
         contextmenu = []
-        contextmenu += [(Const.STR(30906), 'Action(Info)')] # 詳細情報
+        contextmenu += [(Const.STR(30938), 'Action(Info)')] # 詳細情報
         contextmenu += self.downloader.contextmenu(item) # ダウンロード追加/削除
         contextmenu += [(Const.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])] # トップに戻る
         contextmenu += [(Const.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])] # アドオン設定

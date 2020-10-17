@@ -31,21 +31,16 @@ class Downloader:
         filepath = os.path.join(self.download_path, self.local_id, '%s.mp4' % contentid)
         return os.path.isfile(filepath)
 
-    def __convert(self, obj):
-        if isinstance(obj, dict):
-            obj1 = {}
-            for key, val in obj.items():
-                obj1[key.encode('utf-8')] = self.__convert(val)
-            return obj1
-        elif isinstance(obj, list):
-            return map(lambda x: self.__convert(x), obj)
-        elif isinstance(obj, unicode):
-            return obj.encode('utf-8')
-        else:
-            return obj
-
     def __jsonfile(self, contentid):
         return os.path.join(self.cache_path, '%s.json' % contentid)
+
+    def __save(self, contentid, item):
+        json_file = self.__jsonfile(contentid)
+        if not os.path.isfile(json_file):
+            with open(json_file, 'w') as f:
+                json_data = json.dumps(item, indent=4, ensure_ascii=True, sort_keys=True)
+                f.write(json_data)
+        return json_file
 
     def top(self, icon_image=None):
         if self.__available():
@@ -66,7 +61,7 @@ class Downloader:
                 action = 'RunPlugin(plugin://%s?action=delete&addonid=%s&contentid=%s)' % (self.remote_id, self.local_id, urllib.quote_plus(contentid))
                 contextmenu = [(self.remote_addon.getLocalizedString(30930), action)]
             else:
-                json_file = self.save(contentid, item)
+                json_file = self.__save(contentid, item)
                 if url is None:
                     action = 'RunPlugin(plugin://%s?action=download&url=%s&contentid=%s)' % (self.local_id, urllib.quote_plus(s['url']), urllib.quote_plus(contentid))
                 else:
@@ -79,19 +74,3 @@ class Downloader:
             json_file = self.__jsonfile(contentid)
             action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id,  urllib.quote_plus(url),  urllib.quote_plus(json_file))
             xbmc.executebuiltin(action)
-
-    def load(self, contentid):
-        json_file = self.__jsonfile(contentid)
-        json_data = {}
-        if os.path.isfile(json_file):
-            with open(json_file, 'r') as f:
-                json_data = self.__convert(json.loads(f.read()))
-        return json_data
-
-    def save(self, contentid, item):
-        json_file = self.__jsonfile(contentid)
-        if not os.path.isfile(json_file):
-            with open(json_file, 'w') as f:
-                json_data = json.dumps(item, indent=4, ensure_ascii=True, sort_keys=True)
-                f.write(json_data)
-        return json_file

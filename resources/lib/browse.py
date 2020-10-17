@@ -319,7 +319,7 @@ class Browse:
         listitem = xbmcgui.ListItem(item['title'])
         listitem.setArt({'icon':s['thumbnail'], 'thumb':s['thumbnail'], 'poster':s['thumbnail']})
         listitem.setInfo(type='video', infoLabels=labels)
-        listitem.setProperty('IsPlayable', 'true')
+        #listitem.setProperty('IsPlayable', 'true')
         # context menu
         contextmenu = []
         contextmenu += [(Const.STR(30938), 'Action(Info)')] # 詳細情報

@@ -181,7 +181,8 @@ class Browse:
 
     def play(self, url):
         url = self.__extract_url(url)
-        xbmc.executebuiltin('PlayMedia(%s)' % url)
+        #xbmc.executebuiltin('PlayMedia(%s)' % url)
+        xbmcplugin.setResolvedUrl(int(sys.argv[1]), succeeded=True, listitem=xbmcgui.ListItem(path=url))
 
     def download(self, url, contentid):
         url = self.__extract_url(url)
@@ -319,7 +320,7 @@ class Browse:
         listitem = xbmcgui.ListItem(item['title'])
         listitem.setArt({'icon':s['thumbnail'], 'thumb':s['thumbnail'], 'poster':s['thumbnail']})
         listitem.setInfo(type='video', infoLabels=labels)
-        #listitem.setProperty('IsPlayable', 'true')
+        listitem.setProperty('IsPlayable', 'true')
         # context menu
         contextmenu = []
         contextmenu += [(Const.STR(30938), 'Action(Info)')] # 詳細情報

@@ -16,10 +16,13 @@ class Downloader:
             self.remote_id = 'plugin.video.downloader'
             self.remote_addon = xbmcaddon.Addon(self.remote_id)
             self.download_path = self.remote_addon.getSetting('download_path')
+            self.cache_path = os.path.join(xbmc.translatePath(self.remote_addon.getAddonInfo('profile')), 'cache', self.local_id)
+            if not os.path.isdir(self.cache_path): os.makedirs(self.cache_path)
         except:
             self.remote_id = None
             self.remote_addon = None
             self.download_path = None
+            self.cache_path = None
 
     def __available(self):
         return self.remote_addon is not None
@@ -27,6 +30,22 @@ class Downloader:
     def __exists(self, contentid):
         filepath = os.path.join(self.download_path, self.local_id, '%s.mp4' % contentid)
         return os.path.isfile(filepath)
+
+    def __convert(self, obj):
+        if isinstance(obj, dict):
+            obj1 = {}
+            for key, val in obj.items():
+                obj1[key.encode('utf-8')] = self.__convert(val)
+            return obj1
+        elif isinstance(obj, list):
+            return map(lambda x: self.__convert(x), obj)
+        elif isinstance(obj, unicode):
+            return obj.encode('utf-8')
+        else:
+            return obj
+
+    def __jsonfile(self, contentid):
+        return os.path.join(self.cache_path, '%s.json' % contentid)
 
     def top(self, icon_image=None):
         if self.__available():
@@ -40,22 +59,39 @@ class Downloader:
 
     def contextmenu(self, item, url=None):
         contextmenu = []
+        s = item['_summary']
+        contentid = s['contentid']
         if self.__available():
-            contentid = item.get('contentid', '')
             if self.__exists(contentid):
                 action = 'RunPlugin(plugin://%s?action=delete&addonid=%s&contentid=%s)' % (self.remote_id, self.local_id, urllib.quote_plus(contentid))
                 contextmenu = [(self.remote_addon.getLocalizedString(30930), action)]
             else:
-                dumps = json.dumps(item)
+                json_file = self.save(contentid, item)
                 if url is None:
-                    action = 'RunPlugin(plugin://%s?action=download&json=%s)' % (self.local_id, urllib.quote_plus(dumps))
+                    action = 'RunPlugin(plugin://%s?action=download&url=%s&contentid=%s)' % (self.local_id, urllib.quote_plus(s['url']), urllib.quote_plus(contentid))
                 else:
-                    action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id,  urllib.quote_plus(url), urllib.quote_plus(dumps))
+                    action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id,  urllib.quote_plus(url), urllib.quote_plus(json_file))
                 contextmenu = [(self.remote_addon.getLocalizedString(30929), action)]
         return contextmenu
 
-    def download(self, item, url):
+    def download(self, url, contentid):
         if self.__available():
-            dumps = json.dumps(item)
-            action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id,  urllib.quote_plus(url),  urllib.quote_plus(dumps))
+            json_file = self.__jsonfile(contentid)
+            action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id,  urllib.quote_plus(url),  urllib.quote_plus(json_file))
             xbmc.executebuiltin(action)
+
+    def load(self, contentid):
+        json_file = self.__jsonfile(contentid)
+        json_data = {}
+        if os.path.isfile(json_file):
+            with open(json_file, 'r') as f:
+                json_data = self.__convert(json.loads(f.read()))
+        return json_data
+
+    def save(self, contentid, item):
+        json_file = self.__jsonfile(contentid)
+        if not os.path.isfile(json_file):
+            with open(json_file, 'w') as f:
+                json_data = json.dumps(item, indent=4, ensure_ascii=True, sort_keys=True)
+                f.write(json_data)
+        return json_file

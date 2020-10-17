@@ -126,6 +126,7 @@ class Browse:
         url = 'https://api.tver.jp/v4/search?catchup=1&%s&token=%s' % (self.query, token)
         buf = urlread(url)
         datalist = json.loads(buf).get('data',[])
+        datadict = {}
         for data in sorted(datalist, key=lambda item: self.__date(item)[0], reverse=True):
             '''
             {
@@ -171,25 +172,26 @@ class Browse:
                 "url": "http://www.ytv.co.jp/niketsu/"
             }
             '''
+            # データ変換
+            data = convert(data)
             # 表示
-            self.__add_item(convert(data))
+            self.__add_item(data)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-    def play(self, item):
-        url = self.__extract_url(item)
+    def play(self, url):
+        url = self.__extract_url(url)
         xbmc.executebuiltin('PlayMedia(%s)' % url)
 
-    def download(self, item):
-        url = self.__extract_url(item)
-        self.downloader.download(item, url)
+    def download(self, url, contentid):
+        url = self.__extract_url(url)
+        self.downloader.download(url, contentid)
 
-    def __extract_url(self, item):
+    def __extract_url(self, url):
         # 番組詳細を取得
         #
         # https://tver.jp/episode/77607556
         #
-        url = item['_summary']['url']
         buf = urlread(url)
         args = {}
         keys = ('player_id','player_key','catchup_id','publisher_id','reference_id','title','sub_title','service','service_name','sceneshare_enabled','share_start')
@@ -279,7 +281,7 @@ class Browse:
         # 抽出結果
         return date
 
-    def __date2label(self, date):
+    def __labeldate(self, date):
         # listitem.date用に変換
         m = re.search('^([0-9]{4})-([0-9]{2})-([0-9]{2})', date)
         if m:
@@ -322,7 +324,7 @@ class Browse:
                 'plot': '%s\n%s' % (s['date'], s['description']),
                 'plotoutline': s['description'],
                 'studio': s['source'],
-                'date': self.__date2label(s['date']),
+                'date': self.__labeldate(s['date']),
             }
             listitem.setInfo(type='video', infoLabels=labels)
         else:

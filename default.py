@@ -4,7 +4,6 @@ import sys
 import json
 import xbmc, xbmcaddon
 
-from resources.lib.common import convert, log, notify
 from resources.lib.browse import Browse
 
 # HTTP接続におけるタイムアウト(秒)
@@ -41,13 +40,11 @@ if __name__  == '__main__':
 
     # play
     elif action == 'play':
-        item = convert(json.loads(args['json']))
-        Browse().play(item)
+        Browse().play(args['url'])
 
     # download
     elif action == 'download':
-        item = convert(json.loads(args['json']))
-        Browse().download(item)
+        Browse().download(args['url'], args['contentid'])
 
     # open settings
     elif action == 'settings':

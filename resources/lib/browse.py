@@ -27,11 +27,11 @@ class Browse:
 
     def show_top(self):
         # 検索:日付
-        self.__add_directory_item(name=Const.STR(30933), query='', action='setdate', iconimage=Const.CALENDAR)
+        self.__add_directory_item(name=Const.STR(30933).encode('utf-8'), query='', action='setdate', iconimage=Const.CALENDAR)
         # 検索:チャンネル
-        self.__add_directory_item(name=Const.STR(30934), query='', action='setchannel', iconimage=Const.RADIO_TOWER)
+        self.__add_directory_item(name=Const.STR(30934).encode('utf-8'), query='', action='setchannel', iconimage=Const.RADIO_TOWER)
         # 検索:ジャンル
-        self.__add_directory_item(name=Const.STR(30935), query='', action='setgenre', iconimage=Const.CATEGORIZE)
+        self.__add_directory_item(name=Const.STR(30935).encode('utf-8'), query='', action='setgenre', iconimage=Const.CATEGORIZE)
         # ダウンロード
         self.downloader.top(Const.DOWNLOADS)
         # end of directory
@@ -39,9 +39,9 @@ class Browse:
 
     def show_date(self):
         # すべての日付
-        name = Const.STR(30820)
+        name = Const.STR(30820).encode('utf-8')
         # 月,火,水,木,金,土,日
-        w = Const.STR(30920).split(',')
+        w = Const.STR(30920).encode('utf-8').split(',')
         # 次のアクション
         if self.args.get('bc') is None:
             action = 'setchannel'
@@ -56,7 +56,8 @@ class Browse:
             d = datetime.date.today() - datetime.timedelta(i)
             wd = d.weekday()
             # 8月31日(土)
-            date1 = d.strftime(Const.STR(30919).encode('utf-8')).decode('utf-8') % w[wd]
+            log(d.strftime(Const.STR(30919).encode('utf-8')))
+            date1 = d.strftime(Const.STR(30919).encode('utf-8')) % w[wd]
             # 2019-08-31
             date2 = d.strftime('%Y-%m-%d')
             if isholiday(date2) or wd == 6:
@@ -72,13 +73,13 @@ class Browse:
 
     def show_channel(self):
         bc_list = [
-            ('', Const.STR(30810)),
-            ('ntv', Const.STR(30811)),
-            ('ex', Const.STR(30812)),
-            ('tbs', Const.STR(30813)),
-            ('tx', Const.STR(30814)),
-            ('cx', Const.STR(30815)),
-            ('nhk', Const.STR(30816)),
+            ('', Const.STR(30810).encode('utf-8')),
+            ('ntv', Const.STR(30811).encode('utf-8')),
+            ('ex', Const.STR(30812).encode('utf-8')),
+            ('tbs', Const.STR(30813).encode('utf-8')),
+            ('tx', Const.STR(30814).encode('utf-8')),
+            ('cx', Const.STR(30815).encode('utf-8')),
+            ('nhk', Const.STR(30816).encode('utf-8')),
         ]
         for id, name in bc_list:
             # 次のアクション
@@ -95,13 +96,13 @@ class Browse:
 
     def show_genre(self):
         genre_list = [
-            ('', Const.STR(30800)),
-            ('drama', Const.STR(30801)),
-            ('variety', Const.STR(30802)),
-            ('documentary', Const.STR(30803)),
-        	('anime', Const.STR(30804)),
-        	('sport', Const.STR(30805)),
-        	('other', Const.STR(30806)),
+            ('', Const.STR(30800).encode('utf-8')),
+            ('drama', Const.STR(30801).encode('utf-8')),
+            ('variety', Const.STR(30802).encode('utf-8')),
+            ('documentary', Const.STR(30803).encode('utf-8')),
+        	('anime', Const.STR(30804).encode('utf-8')),
+        	('sport', Const.STR(30805).encode('utf-8')),
+        	('other', Const.STR(30806).encode('utf-8')),
         ]
         for id, name in genre_list:
             # 次のアクション
@@ -323,10 +324,10 @@ class Browse:
         listitem.setProperty('IsPlayable', 'true')
         # context menu
         contextmenu = []
-        contextmenu += [(Const.STR(30938), 'Action(Info)')] # 詳細情報
+        contextmenu += [(Const.STR(30938).encode('utf-8'), 'Action(Info)')] # 詳細情報
         contextmenu += self.downloader.contextmenu(item) # ダウンロード追加/削除
-        contextmenu += [(Const.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])] # トップに戻る
-        contextmenu += [(Const.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])] # アドオン設定
+        contextmenu += [(Const.STR(30936).encode('utf-8'), 'Container.Update(%s,replace)' % sys.argv[0])] # トップに戻る
+        contextmenu += [(Const.STR(30937).encode('utf-8'), 'RunPlugin(%s?action=settings)' % sys.argv[0])] # アドオン設定
         listitem.addContextMenuItems(contextmenu, replaceItems=True)
         # add directory item
         url = '%s?action=%s&url=%s' % (sys.argv[0], 'play', urllib.quote_plus(s['url']))
@@ -339,8 +340,8 @@ class Browse:
         # context menu
         contextmenu = []
         if query:
-            contextmenu += [(Const.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])] # トップに戻る
-        contextmenu += [(Const.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])] # アドオン設定
+            contextmenu += [(Const.STR(30936).encode('utf-8'), 'Container.Update(%s,replace)' % sys.argv[0])] # トップに戻る
+        contextmenu += [(Const.STR(30937).encode('utf-8'), 'RunPlugin(%s?action=settings)' % sys.argv[0])] # アドオン設定
         listitem.addContextMenuItems(contextmenu, replaceItems=True)
         # add directory item
         url = '%s?action=%s&query=%s' % (sys.argv[0], action, urllib.quote_plus(query))

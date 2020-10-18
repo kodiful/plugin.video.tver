@@ -56,7 +56,6 @@ class Browse:
             d = datetime.date.today() - datetime.timedelta(i)
             wd = d.weekday()
             # 8月31日(土)
-            log(d.strftime(Const.STR(30919).encode('utf-8')))
             date1 = d.strftime(Const.STR(30919).encode('utf-8')) % w[wd]
             # 2019-08-31
             date2 = d.strftime('%Y-%m-%d')

@@ -5,6 +5,7 @@ import re
 import datetime, time
 import urllib, urlparse
 import json
+import hashlib
 import xbmc, xbmcgui, xbmcplugin
 
 from common import *
@@ -291,9 +292,10 @@ class Browse:
         return date
 
     def __contentid(self, item):
-        publisher_id = item.get('publisher_id', 'unknown_publisher_id')
-        reference_id = item.get('reference_id', 'unknown_reference_id')
-        contentid = '%s.%s' % (publisher_id, reference_id)
+        publisher_id = item.get('publisher_id', 'unknown')
+        reference_id = item.get('reference_id', 'unknown')
+        hash = hashlib.md5(json.dumps(item)).hexdigest()
+        contentid = '%s.%s.%s' % (publisher_id, reference_id, hash)
         return contentid
 
     def __add_item(self, item):

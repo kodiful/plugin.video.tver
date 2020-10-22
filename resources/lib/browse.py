@@ -8,6 +8,9 @@ import json
 import hashlib
 import xbmc, xbmcgui, xbmcplugin
 
+from PIL import Image
+from cStringIO import StringIO
+
 from common import *
 from downloader import Downloader
 
@@ -298,6 +301,30 @@ class Browse:
         contentid = '%s.%s.%s' % (publisher_id, reference_id, hash)
         return contentid
 
+    def __thumbnail(self, item):
+        # ファイルパス
+        imagefile = os.path.join(Const.CACHE_PATH, '%s.png' % self.__contentid(item))
+        if os.path.isfile(imagefile) and os.path.getsize(imagefile) < 1000:
+            # delete imagefile
+            os.remove(imagefile)
+            # delete from database
+            conn = sqlite.connect(Const.CACHE_DB)
+            c = conn.cursor()
+            #c.execute("SELECT cachedurl FROM texture WHERE url = '%s';" % imagefile)
+            c.execute("DELETE FROM texture WHERE url = '%s';" % imagefile)
+            conn.commit()
+            conn.close()
+        if os.path.isfile(imagefile):
+            pass
+        else:
+            buffer = urlread(item['images'][0]['small'])
+            image = Image.open(StringIO(buffer)) #320x180
+            image = image.resize((216, 122))
+            background = Image.new('RGB', (216,216), (0,0,0))
+            background.paste(image, (0,47))
+            background.save(imagefile, 'PNG')
+        return imagefile
+
     def __add_item(self, item):
         # 番組情報を付加
         s = item['_summary'] = {
@@ -309,7 +336,7 @@ class Browse:
             'category': '',
             'duration': '',
             'thumbnail': item['images'][0]['small'],
-            'thumbfile': '',
+            'thumbfile': self.__thumbnail(item),
             'contentid': self.__contentid(item),
         }
         # listitem

@@ -7,6 +7,7 @@
       strings 33000 thru 33999 reserved for common strings used in add-ons
   -->
   <string id="30200">設定</string>
+  <string id="30201">[COLOR green]サムネイルキャッシュをクリア[/COLOR]</string>
   <string id="30204">デバッグ</string>
 
   <string id="30800">[COLOR green]すべてのジャンル[/COLOR]</string>

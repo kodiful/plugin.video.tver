@@ -7,6 +7,7 @@
       strings 33000 thru 33999 reserved for common strings used in add-ons
   -->
   <string id="30200">Settings</string>
+  <string id="30201">[COLOR green]Clear Thumbnails Cache[/COLOR]</string>
   <string id="30204">Debug</string>
 
   <string id="30800">All</string>

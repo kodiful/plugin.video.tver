@@ -7,10 +7,10 @@
       strings 33000 thru 33999 reserved for common strings used in add-ons
   -->
   <string id="30200">設定</string>
-  <string id="30201">[COLOR green]サムネイルキャッシュをクリア[/COLOR]</string>
+  <string id="30201">[COLOR lightgreen]サムネイルキャッシュをクリア[/COLOR]</string>
   <string id="30204">デバッグ</string>
 
-  <string id="30800">[COLOR green]すべてのジャンル[/COLOR]</string>
+  <string id="30800">[COLOR lightgreen]すべてのジャンル[/COLOR]</string>
   <string id="30801">ドラマ</string>
   <string id="30802">バラエティ</string>
   <string id="30803">報道・ドキュメンタリー</string>
@@ -18,7 +18,7 @@
   <string id="30805">スポーツ</string>
   <string id="30806">その他</string>
 
-  <string id="30810">[COLOR green]すべてのチャンネル[/COLOR]</string>
+  <string id="30810">[COLOR lightgreen]すべてのチャンネル[/COLOR]</string>
   <string id="30811">日本テレビ系</string>
   <string id="30812">テレビ朝日系</string>
   <string id="30813">TBS系</string>
@@ -26,14 +26,14 @@
   <string id="30815">フジテレビ系</string>
   <string id="30816">NHK</string>
 
-  <string id="30820">[COLOR green]すべての日付[/COLOR]</string>
+  <string id="30820">[COLOR lightgreen]すべての日付[/COLOR]</string>
 
   <string id="30919">%m月%d日(%%s)</string>
   <string id="30920">月,火,水,木,金,土,日</string>
 
-  <string id="30933">[COLOR green]検索:日付[/COLOR]</string>
-  <string id="30934">[COLOR green]検索:チャンネル[/COLOR]</string>
-  <string id="30935">[COLOR green]検索:ジャンル[/COLOR]</string>
+  <string id="30933">[COLOR lightgreen]検索:日付[/COLOR]</string>
+  <string id="30934">[COLOR lightgreen]検索:チャンネル[/COLOR]</string>
+  <string id="30935">[COLOR lightgreen]検索:ジャンル[/COLOR]</string>
   <string id="30936">トップに戻る</string>
   <string id="30937">アドオン設定</string>
   <string id="30938">詳細情報</string>

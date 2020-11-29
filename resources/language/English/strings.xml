@@ -7,7 +7,7 @@
       strings 33000 thru 33999 reserved for common strings used in add-ons
   -->
   <string id="30200">Settings</string>
-  <string id="30201">[COLOR green]Clear Thumbnails Cache[/COLOR]</string>
+  <string id="30201">[COLOR lightgreen]Clear Thumbnails Cache[/COLOR]</string>
   <string id="30204">Debug</string>
 
   <string id="30800">All</string>
@@ -31,9 +31,9 @@
   <string id="30919">%m/%d(%%s)</string>
   <string id="30920">Mon,Tue,Wed,Thu,Fri,Sat,Sun</string>
 
-  <string id="30933">[COLOR green]Search:Date[/COLOR]</string>
-  <string id="30934">[COLOR green]Search:Channel[/COLOR]</string>
-  <string id="30935">[COLOR green]Search:Genre[/COLOR]</string>
+  <string id="30933">[COLOR lightgreen]Search:Date[/COLOR]</string>
+  <string id="30934">[COLOR lightgreen]Search:Channel[/COLOR]</string>
+  <string id="30935">[COLOR lightgreen]Search:Genre[/COLOR]</string>
   <string id="30936">Return to top</string>
   <string id="30937">Addon settings</string>
   <string id="30938">Description</string>

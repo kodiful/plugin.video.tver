@@ -11,6 +11,11 @@ import xbmc, xbmcgui, xbmcplugin
 from PIL import Image
 from cStringIO import StringIO
 
+try:
+    from sqlite3 import dbapi2 as sqlite
+except:
+    from pysqlite2 import dbapi2 as sqlite
+
 from common import *
 from downloader import Downloader
 

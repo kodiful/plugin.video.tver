@@ -2,7 +2,8 @@
 
 import sys
 import json
-import xbmc, xbmcaddon
+import xbmc
+import xbmcaddon
 
 from resources.lib.common import *
 from resources.lib.browse import Browse
@@ -20,24 +21,28 @@ class Cache():
 
     def clear(self):
         for file in self.files:
-            try: os.remove(os.path.join(Const.CACHE_PATH, file))
-            except: pass
+            try:
+                os.remove(os.path.join(Const.CACHE_PATH, file))
+            except Exception:
+                pass
 
     def update(self):
         size = 0
         for file in self.files:
-            try: size = size + os.path.getsize(os.path.join(Const.CACHE_PATH, file))
-            except: pass
+            try:
+                size = size + os.path.getsize(os.path.join(Const.CACHE_PATH, file))
+            except Exception:
+                pass
         log(size)
-        if size > 1024*1024:
-            Const.SET('cache', '%.1f MB / %d files' % (size/1024.0/1024.0,len(self.files)))
+        if size > 1024 * 1024:
+            Const.SET('cache', '%.1f MB / %d files' % (size / 1024 / 1024, len(self.files)))
         elif size > 1024:
-            Const.SET('cache', '%.1f kB / %d files' % (size/1024.0,len(self.files)))
+            Const.SET('cache', '%.1f kB / %d files' % (size / 1024, len(self.files)))
         else:
-            Const.SET('cache', '%d bytes / %d files' % (size,len(self.files)))
+            Const.SET('cache', '%d bytes / %d files' % (size, len(self.files)))
 
 
-if __name__  == '__main__':
+if __name__ == '__main__':
 
     # 引数
     args, _ = Browse().update_query(sys.argv[2][1:])

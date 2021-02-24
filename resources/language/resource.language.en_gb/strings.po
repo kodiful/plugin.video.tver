@@ -1,0 +1,122 @@
+# Kodi Media Center language file
+# Addon Name: TVer Client
+# Addon id: plugin.video.tver
+# Addon Provider: kodiful
+msgid ""
+msgstr ""
+"Project-Id-Version: Kodi Addons\n"
+"Report-Msgid-Bugs-To: https://forum.kodi.tv/\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Kodi Translation Team\n"
+"Language-Team: Team-Kodi\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en_GB\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#30200"
+msgid "Settings"
+msgstr ""
+
+msgctxt "#30201"
+msgid "[COLOR lightgreen]Clear Thumbnails Cache[/COLOR]"
+msgstr ""
+
+msgctxt "#30204"
+msgid "Debug"
+msgstr ""
+
+msgctxt "#30800"
+msgid "All"
+msgstr ""
+
+msgctxt "#30801"
+msgid "Drama"
+msgstr ""
+
+msgctxt "#30802"
+msgid "Variety"
+msgstr ""
+
+msgctxt "#30803"
+msgid "Documentary"
+msgstr ""
+
+msgctxt "#30804"
+msgid "Anime"
+msgstr ""
+
+msgctxt "#30805"
+msgid "Sport"
+msgstr ""
+
+msgctxt "#30806"
+msgid "Other"
+msgstr ""
+
+msgctxt "#30810"
+msgid "All"
+msgstr ""
+
+msgctxt "#30811"
+msgid "NTV"
+msgstr ""
+
+msgctxt "#30812"
+msgid "EX"
+msgstr ""
+
+msgctxt "#30813"
+msgid "TBS"
+msgstr ""
+
+msgctxt "#30814"
+msgid "TX"
+msgstr ""
+
+msgctxt "#30815"
+msgid "CX"
+msgstr ""
+
+msgctxt "#30816"
+msgid "NHK"
+msgstr ""
+
+msgctxt "#30820"
+msgid "All"
+msgstr ""
+
+msgctxt "#30919"
+msgid "%m/%d(%%s)"
+msgstr ""
+
+msgctxt "#30920"
+msgid "Mon,Tue,Wed,Thu,Fri,Sat,Sun"
+msgstr ""
+
+msgctxt "#30933"
+msgid "[COLOR lightgreen]Search:Date[/COLOR]"
+msgstr ""
+
+msgctxt "#30934"
+msgid "[COLOR lightgreen]Search:Channel[/COLOR]"
+msgstr ""
+
+msgctxt "#30935"
+msgid "[COLOR lightgreen]Search:Genre[/COLOR]"
+msgstr ""
+
+msgctxt "#30936"
+msgid "Return to top"
+msgstr ""
+
+msgctxt "#30937"
+msgid "Addon settings"
+msgstr ""
+
+msgctxt "#30938"
+msgid "Description"
+msgstr ""
+

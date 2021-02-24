@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.tver"
-       name="TVer Client"
-       version="1.0"
-       provider-name="kodiful">
+<addon id="plugin.video.tver" name="TVer Client" version="2.0" provider-name="kodiful">
   <requires>
-    <import addon="xbmc.python" version="2.1.0"/>
-    <import addon="script.module.pil" version="1.1.7"/>
+    <import addon="xbmc.python" version="3.0.0" />
+    <import addon="script.module.pil" version="1.1.7" />
   </requires>
   <extension point="xbmc.python.pluginsource" library="default.py">
     <provides>video</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
-    <summary lang="en">TVer Client</summary>
-    <summary lang="ja">TVerクライアント</summary>
-    <description lang="en">Watch TVer video contents</description>
-    <description lang="ja">TVerの動画コンテンツを視聴します</description>
-    <disclaimer lang="en">Tested on macOS</disclaimer>
-    <disclaimer lang="ja">macOSで動作検証しています</disclaimer>
+    <summary lang="en_GB">TVer Client</summary>
+    <summary lang="ja_JP">TVerクライアント</summary>
+    <description lang="en_GB">Watch TVer video contents</description>
+    <description lang="ja_JP">TVerの動画コンテンツを視聴します</description>
+    <disclaimer lang="en_GB">Tested on macOS</disclaimer>
+    <disclaimer lang="ja_JP">macOSで動作検証しています</disclaimer>
     <website>http://kodiful.com/</website>
   </extension>
 </addon>

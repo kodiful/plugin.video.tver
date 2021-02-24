@@ -244,7 +244,7 @@ class Browse:
             }
         }
         '''
-        vals = map(lambda x: x.strip(" '\t"), re.search(r'addPlayer\((.*?)\);', re.sub(r'\n', ' ', buf)).group(1).split(','))
+        vals = map(lambda x: x.strip(" '\t"), re.search(r'addPlayer\((.*?)\);', re.sub(r'\n', ' ', buf.decode())).group(1).split(','))
         for key, val in zip(keys, vals):
             args[key] = val
         # ポリシーキーを取得
@@ -256,7 +256,7 @@ class Browse:
         #
         # options:{accountId:"4394098882001",policyKey:"BCpkADawqM1l5pA4XtMLusHj72LGzFewqKZzldpmNYTUQdoKnFL_GHhN3dg5FRnNQ5V7SOUKBl-tYFMt8CpSzuSzFAPhIHtVwmMz6F52VnMfu2UjDmeYfvvUqk0CWon46Yh-CZwIVp5vfXrZ"}
         #
-        pk = re.search(r'options:\{accountId:"(.*?)",policyKey:"(.*?)"\}', buf).group(2)
+        pk = re.search(r'options:\{accountId:"(.*?)",policyKey:"(.*?)"\}', buf.decode()).group(2)
         # HLSマスターのURLを取得
         if args['service'] != 'tx' and args['service'] != 'russia2018' and args['service'] != "gorin":
             ref_id = 'ref:' + args['reference_id']

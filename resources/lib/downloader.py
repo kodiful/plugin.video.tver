@@ -3,7 +3,9 @@
 import sys
 import os
 import json
-import urllib
+
+from urllib.parse import quote_plus
+
 import xbmc
 import xbmcaddon
 import xbmcgui
@@ -64,19 +66,19 @@ class Downloader:
         contentid = s['contentid']
         if self.__available():
             if self.__exists(contentid):
-                action = 'RunPlugin(plugin://%s?action=delete&addonid=%s&contentid=%s)' % (self.remote_id, self.local_id, urllib.quote_plus(contentid))
+                action = 'RunPlugin(plugin://%s?action=delete&addonid=%s&contentid=%s)' % (self.remote_id, self.local_id, quote_plus(contentid))
                 contextmenu = [(self.remote_addon.getLocalizedString(30930), action)]
             else:
                 json_file = self.__save(contentid, item)
                 if url is None:
-                    action = 'RunPlugin(plugin://%s?action=download&url=%s&contentid=%s)' % (self.local_id, urllib.quote_plus(s['url']), urllib.quote_plus(contentid))
+                    action = 'RunPlugin(plugin://%s?action=download&url=%s&contentid=%s)' % (self.local_id, quote_plus(s['url']), quote_plus(contentid))
                 else:
-                    action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id, urllib.quote_plus(url), urllib.quote_plus(json_file))
+                    action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id, quote_plus(url), quote_plus(json_file))
                 contextmenu = [(self.remote_addon.getLocalizedString(30929), action)]
         return contextmenu
 
     def download(self, url, contentid):
         if self.__available():
             json_file = self.__jsonfile(contentid)
-            action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id, urllib.quote_plus(url), urllib.quote_plus(json_file))
+            action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id, quote_plus(url), quote_plus(json_file))
             xbmc.executebuiltin(action)

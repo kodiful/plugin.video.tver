@@ -58,8 +58,9 @@ def convert(obj):
 
 
 # workaround for encode problems for strftime on Windows
+# cf. https://ja.stackoverflow.com/questions/44597/windows上のpythonのdatetime-strftimeで日本語を使うとエラーになる
 def strftime(d, format):
-    return d.strftime(format.encode('unicode-escape')).decode('unicode-escape')
+    return d.strftime(format.encode('unicode-escape').decode()).encode().decode('unicode-escape')
 
 
 def urlread(url, *headers):

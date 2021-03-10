@@ -189,8 +189,6 @@ class Browse:
                 "url": "http://www.ytv.co.jp/niketsu/"
             }
             '''
-            # データ変換
-            data = convert(data)
             # 表示
             self.__add_item(data)
         # end of directory

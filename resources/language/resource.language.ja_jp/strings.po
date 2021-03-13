@@ -119,4 +119,3 @@ msgstr "アドオン設定"
 msgctxt "#30938"
 msgid "Description"
 msgstr "詳細情報"
-

@@ -19,10 +19,11 @@ class Downloader:
         self.local_addon = xbmcaddon.Addon()
         self.local_id = self.local_addon.getAddonInfo('id')
         try:
-            self.remote_id = 'plugin.video.downloader'
+            self.remote_id = 'plugin.video.tver'
             self.remote_addon = xbmcaddon.Addon(self.remote_id)
             self.download_path = self.remote_addon.getSetting('download_path')
-            self.cache_path = os.path.join(xbmcvfs.translatePath(self.remote_addon.getAddonInfo('profile')), 'cache', self.local_id)
+            self.cache_path = os.path.join(xbmcvfs.translatePath(
+                self.remote_addon.getAddonInfo('profile')), 'cache', self.local_id)
             if not os.path.isdir(self.cache_path):
                 os.makedirs(self.cache_path)
         except Exception:
@@ -35,7 +36,8 @@ class Downloader:
         return self.remote_addon is not None
 
     def __exists(self, contentid):
-        filepath = os.path.join(self.download_path, self.local_id, '%s.mp4' % contentid)
+        filepath = os.path.join(
+            self.download_path, self.local_id, '%s.mp4' % contentid)
         return os.path.isfile(filepath)
 
     def __jsonfile(self, contentid):
@@ -45,19 +47,23 @@ class Downloader:
         json_file = self.__jsonfile(contentid)
         if not os.path.isfile(json_file):
             with open(json_file, 'w') as f:
-                json_data = json.dumps(item, indent=4, ensure_ascii=True, sort_keys=True)
+                json_data = json.dumps(
+                    item, indent=4, ensure_ascii=True, sort_keys=True)
                 f.write(json_data)
         return json_file
 
     def top(self, iconimage=None):
         if self.__available():
-            listitem = xbmcgui.ListItem(self.remote_addon.getLocalizedString(30927))
+            listitem = xbmcgui.ListItem(
+                self.remote_addon.getLocalizedString(30927))
             listitem.setArt({'icon': iconimage})
             listitem.setInfo(type='video', infoLabels={})
             action = 'RunPlugin(plugin://%s?action=settings)' % (self.remote_id)
-            contextmenu = [(self.remote_addon.getLocalizedString(30937), action)]
+            contextmenu = [
+                (self.remote_addon.getLocalizedString(30937), action)]
             listitem.addContextMenuItems(contextmenu, replaceItems=True)
-            url = 'plugin://%s?action=list&addonid=%s' % (self.remote_id, self.local_id)
+            url = 'plugin://%s?action=list&addonid=%s' % (
+                self.remote_id, self.local_id)
             xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, True)
 
     def contextmenu(self, item, url=None):
@@ -66,19 +72,25 @@ class Downloader:
         contentid = s['contentid']
         if self.__available():
             if self.__exists(contentid):
-                action = 'RunPlugin(plugin://%s?action=delete&addonid=%s&contentid=%s)' % (self.remote_id, self.local_id, quote_plus(contentid))
-                contextmenu = [(self.remote_addon.getLocalizedString(30930), action)]
+                action = 'RunPlugin(plugin://%s?action=delete&addonid=%s&contentid=%s)' % (
+                    self.remote_id, self.local_id, quote_plus(contentid))
+                contextmenu = [
+                    (self.remote_addon.getLocalizedString(30930), action)]
             else:
                 json_file = self.__save(contentid, item)
                 if url is None:
-                    action = 'RunPlugin(plugin://%s?action=download&url=%s&contentid=%s)' % (self.local_id, quote_plus(s['url']), quote_plus(contentid))
+                    action = 'RunPlugin(plugin://%s?action=download&url=%s&contentid=%s)' % (
+                        self.local_id, quote_plus(s['url']), quote_plus(contentid))
                 else:
-                    action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id, quote_plus(url), quote_plus(json_file))
-                contextmenu = [(self.remote_addon.getLocalizedString(30929), action)]
+                    action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (
+                        self.remote_id, self.local_id, quote_plus(url), quote_plus(json_file))
+                contextmenu = [
+                    (self.remote_addon.getLocalizedString(30929), action)]
         return contextmenu
 
     def download(self, url, contentid):
         if self.__available():
             json_file = self.__jsonfile(contentid)
-            action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id, quote_plus(url), quote_plus(json_file))
+            action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (
+                self.remote_id, self.local_id, quote_plus(url), quote_plus(json_file))
             xbmc.executebuiltin(action)

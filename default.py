@@ -30,14 +30,17 @@ class Cache():
         size = 0
         for file in self.files:
             try:
-                size = size + os.path.getsize(os.path.join(Const.CACHE_PATH, file))
+                size = size + \
+                    os.path.getsize(os.path.join(Const.CACHE_PATH, file))
             except Exception:
                 pass
         log(size)
         if size > 1024 * 1024:
-            Const.SET('cache', '%.1f MB / %d files' % (size / 1024 / 1024, len(self.files)))
+            Const.SET('cache', '%.1f MB / %d files' %
+                      (size / 1024 / 1024, len(self.files)))
         elif size > 1024:
-            Const.SET('cache', '%.1f kB / %d files' % (size / 1024, len(self.files)))
+            Const.SET('cache', '%.1f kB / %d files' %
+                      (size / 1024, len(self.files)))
         else:
             Const.SET('cache', '%d bytes / %d files' % (size, len(self.files)))
 
@@ -91,4 +94,5 @@ if __name__ == '__main__':
         # update cache settings
         Cache().update()
         # open settings
-        xbmc.executebuiltin('Addon.OpenSettings(%s)' % xbmcaddon.Addon().getAddonInfo('id'))
+        xbmc.executebuiltin('Addon.OpenSettings(%s)' %
+                            xbmcaddon.Addon().getAddonInfo('id'))

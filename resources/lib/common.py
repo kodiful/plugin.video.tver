@@ -35,9 +35,11 @@ class Const:
     CACHE_DB = os.path.join(DB_PATH, 'Textures13.db')
 
     # サムネイル
-    DOWNLOADS = os.path.join(IMAGES_PATH, 'icons8-downloads-folder-filled-500.png')
+    DOWNLOADS = os.path.join(
+        IMAGES_PATH, 'icons8-downloads-folder-filled-500.png')
     CALENDAR = os.path.join(IMAGES_PATH, 'icons8-calendar-filled-500.png')
-    RADIO_TOWER = os.path.join(IMAGES_PATH, 'icons8-radio-tower-filled-500.png')
+    RADIO_TOWER = os.path.join(
+        IMAGES_PATH, 'icons8-radio-tower-filled-500.png')
     CATEGORIZE = os.path.join(IMAGES_PATH, 'icons8-categorize-filled-500.png')
 
 
@@ -49,12 +51,17 @@ def strftime(d, format):
 
 def urlread(url, *headers):
     opener = build_opener()
-    h = [('User-Agent', 'Mozilla/5.0')]  # User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0) Gecko/20100101 Firefox/68.0
+    # User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0) Gecko/20100101 Firefox/68.0
+    h = [('User-Agent', 'Mozilla/5.0')]
+    data = None
     for header in headers:
-        h.append(header)
+        if header[0] == 'data':
+            data = header[1]
+        else:
+            h.append(header)
     opener.addheaders = h
     try:
-        response = opener.open(url)
+        response = opener.open(url, data)
         buf = response.read()
         response.close()
     except HTTPError as e:
@@ -76,7 +83,8 @@ def notify(message, **options):
         else:
             image = 'DefaultIconInfo.png'
     log(message, error=options.get('error', False))
-    xbmc.executebuiltin('Notification("%s","%s",%d,"%s")' % (addon.getAddonInfo('name'), message, time, image))
+    xbmc.executebuiltin('Notification("%s","%s",%d,"%s")' %
+                        (addon.getAddonInfo('name'), message, time, image))
 
 
 def log(*messages, **options):
@@ -92,7 +100,8 @@ def log(*messages, **options):
         for message in messages:
             m.append(str(message))
         frame = inspect.currentframe().f_back
-        xbmc.log(str('%s: %s(%d): %s: %s') % (addon.getAddonInfo('id'), os.path.basename(frame.f_code.co_filename), frame.f_lineno, frame.f_code.co_name, str(' ').join(m)), level)
+        xbmc.log(str('%s: %s(%d): %s: %s') % (addon.getAddonInfo('id'), os.path.basename(
+            frame.f_code.co_filename), frame.f_lineno, frame.f_code.co_name, str(' ').join(m)), level)
 
 
 def isholiday(day):

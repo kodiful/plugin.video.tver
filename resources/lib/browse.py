@@ -29,7 +29,7 @@ from resources.lib.downloader import Downloader
 
 class Browse:
 
-    def __init__(self, query='bc=all&genre=all&bc=all'):
+    def __init__(self, query='bc=all&genre=all'):
         self.query = query
         self.args, _ = self.update_query(self.query)
         self.downloader = Downloader()
@@ -43,11 +43,14 @@ class Browse:
 
     def show_top(self):
         # 検索:日付
-        self.__add_directory_item(name=Const.STR(30933), query='', action='setdate', iconimage=Const.CALENDAR)
+        self.__add_directory_item(name=Const.STR(
+            30933), query='', action='setdate', iconimage=Const.CALENDAR)
         # 検索:チャンネル
-        self.__add_directory_item(name=Const.STR(30934), query='', action='setchannel', iconimage=Const.RADIO_TOWER)
+        self.__add_directory_item(name=Const.STR(
+            30934), query='', action='setchannel', iconimage=Const.RADIO_TOWER)
         # 検索:ジャンル
-        self.__add_directory_item(name=Const.STR(30935), query='', action='setgenre', iconimage=Const.CATEGORIZE)
+        self.__add_directory_item(name=Const.STR(
+            30935), query='', action='setgenre', iconimage=Const.CATEGORIZE)
         # ダウンロード
         self.downloader.top(Const.DOWNLOADS)
         # end of directory
@@ -58,6 +61,7 @@ class Browse:
         name = Const.STR(30820)
         # 月,火,水,木,金,土,日
         w = Const.STR(30920).split(',')
+        w_en = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
         # 次のアクション
         if self.args.get('bc') is None:
             action = 'setchannel'
@@ -66,36 +70,32 @@ class Browse:
         else:
             action = 'search'
         _, query = self.update_query(self.query, {'date': ''})
-        self.__add_directory_item(name, query, action, iconimage=Const.CALENDAR)
-        # 直近30日分のメニューを追加
-        for i in range(30):
-            d = datetime.date.today() - datetime.timedelta(i)
-            wd = d.weekday()
-            # 8月31日(土)
-            # date1 = d.strftime(Const.STR(30919)) % w[wd]
-            date1 = strftime(d, Const.STR(30919)) % w[wd]
-            # 2019-08-31
-            date2 = d.strftime('%Y-%m-%d')
-            if isholiday(date2) or wd == 6:
+        self.__add_directory_item(
+            name, query, action, iconimage=Const.CALENDAR)
+        # 曜日のメニューを追加
+        for wd in range(7):
+            date1 = w[wd]
+            if wd == 6:
                 name = '[COLOR red]%s[/COLOR]' % date1
             elif wd == 5:
                 name = '[COLOR blue]%s[/COLOR]' % date1
             else:
                 name = date1
-            _, query = self.update_query(self.query, {'date': date2})
-            self.__add_directory_item(name, query, action, iconimage=Const.CALENDAR)
+            _, query = self.update_query(self.query, {'date': w_en[wd]})
+            self.__add_directory_item(
+                name, query, action, iconimage=Const.CALENDAR)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
     def show_channel(self):
         bc_list = [
             ('', Const.STR(30810)),
-            ('ntv', Const.STR(30811)),
-            ('ex', Const.STR(30812)),
-            ('tbs', Const.STR(30813)),
-            ('tx', Const.STR(30814)),
-            ('cx', Const.STR(30815)),
-            ('nhk', Const.STR(30816)),
+            ('nns', Const.STR(30811)),
+            ('exnetwork', Const.STR(30812)),
+            ('jnn', Const.STR(30813)),
+            ('txn', Const.STR(30814)),
+            ('fns', Const.STR(30815)),
+            ('nhknet', Const.STR(30816)),
         ]
         for id, name in bc_list:
             # 次のアクション
@@ -106,16 +106,16 @@ class Browse:
             else:
                 action = 'search'
             _, query = self.update_query(self.query, {'bc': id})
-            self.__add_directory_item(name, query, action, iconimage=Const.RADIO_TOWER)
+            self.__add_directory_item(
+                name, query, action, iconimage=Const.RADIO_TOWER)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
     def show_genre(self):
         genre_list = [
-            ('', Const.STR(30800)),
             ('drama', Const.STR(30801)),
             ('variety', Const.STR(30802)),
-            ('documentary', Const.STR(30803)),
+            ('news_documentary', Const.STR(30803)),
             ('anime', Const.STR(30804)),
             ('sport', Const.STR(30805)),
             ('other', Const.STR(30806)),
@@ -129,20 +129,32 @@ class Browse:
             else:
                 action = 'search'
             _, query = self.update_query(self.query, {'genre': id})
-            self.__add_directory_item(name, query, action, iconimage=Const.CATEGORIZE)
+            self.__add_directory_item(
+                name, query, action, iconimage=Const.CATEGORIZE)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
     def search(self):
         # トークンを取得
-        url = 'https://tver.jp/api/access_token.php'
-        buf = urlread(url)
+        url = 'https://platform-api.tver.jp/v2/api/platform_users/browser/create'
+        buf = urlread(url, ('data', b'device_type=pc'),
+                      ('Origin', 'https://s.tver.jp'),
+                      ('Referer', 'https://s.tver.jp/'),
+                      ('Content-Type', 'application/x-www-form-urlencoded'))
         jso = json.loads(buf)
-        token = jso.get('token', '')
+        platform_uid = jso.get('result', []).get('platform_uid')
+        platform_token = jso.get('result', []).get('platform_token')
+        Const.SET('platform_uid', platform_uid)
+        Const.SET('platform_token', platform_token)
+        filter_key = list(
+            filter(None, [self.args.get('date'), self.args.get('bc')]))
         # 番組検索
-        url = 'https://api.tver.jp/v4/search?catchup=1&%s&token=%s' % (self.query, token)
-        buf = urlread(url)
-        datalist = json.loads(buf).get('data', [])
+        url = 'https://platform-api.tver.jp/service/api/v1/callTagSearch/%s?filterKey=%s&sortKey=open_at&require_data=later&platform_uid=%s&platform_token=%s' % (
+            self.args.get('genre'), ','.join(filter_key), platform_uid, platform_token)
+        buf = urlread(url, ('Origin', 'https://s.tver.jp'),
+                      ('Referer', 'https://s.tver.jp/'),
+                      ('x-tver-platform-type', 'web'))
+        datalist = json.loads(buf).get('result', []).get('contents', [])
         datadict = {}
         for data in sorted(datalist, key=lambda item: self.__date(item), reverse=True):
             '''
@@ -197,7 +209,8 @@ class Browse:
     def play(self, url):
         url = self.__extract_url(url)
         # xbmc.executebuiltin('PlayMedia(%s)' % url)
-        xbmcplugin.setResolvedUrl(int(sys.argv[1]), succeeded=True, listitem=xbmcgui.ListItem(path=url))
+        xbmcplugin.setResolvedUrl(
+            int(sys.argv[1]), succeeded=True, listitem=xbmcgui.ListItem(path=url))
 
     def download(self, url, contentid):
         url = self.__extract_url(url)
@@ -208,63 +221,42 @@ class Browse:
         #
         # https://tver.jp/episode/77607556
         #
-        buf = urlread(url)
-        args = {}
-        keys = ('player_id', 'player_key', 'catchup_id', 'publisher_id', 'reference_id', 'title', 'sub_title', 'service', 'service_name', 'sceneshare_enabled', 'share_start')
-        '''
-        function showPlayer(){
-            if( canPlayMovie() ){
-                addPlayer(
-                    '4394098882001',
-                    'TtyB0eZ4Y',
-                    'f0058835',
-                    '4394098882001',
-                    '104da7b3-2df3-491a-bab2-5f08793e608a',
-                    'ぶらり途中下車の旅',
-                    ' 小田急線',
-                    'ntv',
-                    '日テレ無料',
-                    true,
-                    0
-                );
-            }else{
-                addSpPlayer(
-                    'f0058835',
-                    'ぶらり途中下車の旅',
-                    ' 小田急線',
-                    'ntv',
-                    '日テレ無料',
-                    'https%3A%2F%2Ftver.jp%2Fepisode%2F77607556',
-                    '',
-                    '104da7b3-2df3-491a-bab2-5f08793e608a',
-                    0,
-                    ''
-                );
-            }
-        }
-        '''
-        vals = map(lambda x: x.strip(" '\t"), re.search(r'addPlayer\((.*?)\);', re.sub(r'\n', ' ', buf.decode())).group(1).split(','))
-        for key, val in zip(keys, vals):
-            args[key] = val
+        vid = url.replace('https://tver.jp/episodes/', '')
+        url = 'https://platform-api.tver.jp/service/api/v1/callEpisode/%s?platform_uid=%s&platform_token=%s' % (
+            vid, Const.GET('platform_uid'), Const.GET('platform_token'))
+        buf = urlread(url, ('Origin', 'https://s.tver.jp'),
+                      ('Referer', 'https://s.tver.jp/'),
+                      ('x-tver-platform-type', 'web'))
+        episode_content = json.loads(buf)['result']['episode']['content']
+        url = 'https://statics.tver.jp/content/episode/%s.json?v=%s' % (
+            vid, episode_content['version'])
+        episode_json = json.loads(
+            urlread(url,
+                    ('Origin', 'https://s.tver.jp'),
+                    ('Referer', 'https://s.tver.jp/')))
+        args = episode_json['video']
         # ポリシーキーを取得
         #
         # https://players.brightcove.net/4394098882001/TtyB0eZ4Y_default/index.min.js?_=1602300285436
         #
-        url = 'https://players.brightcove.net/%s/%s_default/index.min.js' % (args['player_id'], args['player_key'])
+        url = 'https://players.brightcove.net/%s/%s_default/index.min.js' % (
+            args['accountID'], args['playerID'])
         buf = urlread(url)
         #
         # options:{accountId:"4394098882001",policyKey:"BCpkADawqM1l5pA4XtMLusHj72LGzFewqKZzldpmNYTUQdoKnFL_GHhN3dg5FRnNQ5V7SOUKBl-tYFMt8CpSzuSzFAPhIHtVwmMz6F52VnMfu2UjDmeYfvvUqk0CWon46Yh-CZwIVp5vfXrZ"}
         #
-        pk = re.search(r'options:\{accountId:"(.*?)",policyKey:"(.*?)"\}', buf.decode()).group(2)
+        pk = re.search(
+            r'options:\{accountId:"(.*?)",policyKey:"(.*?)"\}', buf.decode()).group(2)
         # HLSマスターのURLを取得
-        if args['service'] != 'tx' and args['service'] != 'russia2018' and args['service'] != "gorin":
-            ref_id = 'ref:' + args['reference_id']
+        if episode_json['broadcastProviderID'] != 'tx':
+            ref_id = 'ref:' + args['videoRefID']
         else:
-            ref_id = args['reference_id']
+            ref_id = args['videoID']
         #
         # https://edge.api.brightcove.com/playback/v1/accounts/5102072603001/videos/ref%3Asunday_variety_episode_code_6950
         #
-        url = 'https://edge.api.brightcove.com/playback/v1/accounts/%s/videos/%s' % (args['publisher_id'], ref_id)
+        url = 'https://edge.api.brightcove.com/playback/v1/accounts/%s/videos/%s' % (
+            args['accountID'], ref_id)
         buf = urlread(url, ('Accept', 'application/json;pk=%s' % pk))
         jso = json.loads(buf)
         src = jso.get('sources')[3].get('src')
@@ -275,7 +267,7 @@ class Browse:
 
     def __date(self, item):
         # データの時刻情報
-        itemdate = item.get('date', '')
+        itemdate = item.get('broadcastDateLabel', '')
         # 現在時刻
         now = datetime.datetime.now()
         year0 = now.strftime('%Y')
@@ -288,11 +280,13 @@ class Browse:
         m = re.match(r'([0-9]{1,2})月([0-9]{1,2})日', itemdate)
         if m:
             date1 = '%02d-%02d' % (int(m.group(1)), int(m.group(2)))
-            date = '%04d-%s' % (int(year0) - 1 if date1 > date0 else int(year0), date1)
+            date = '%04d-%s' % (int(year0) - 1 if date1 >
+                                date0 else int(year0), date1)
         m = re.match(r'([0-9]{1,2})/([0-9]{1,2})', itemdate)
         if m:
             date1 = '%02d-%02d' % (int(m.group(1)), int(m.group(2)))
-            date = '%04d-%s' % (int(year0) if date1 < date0 else int(year0) - 1, date1)
+            date = '%04d-%s' % (int(year0) if date1 <
+                                date0 else int(year0) - 1, date1)
         # 抽出結果
         return date
 
@@ -304,15 +298,12 @@ class Browse:
         return date
 
     def __contentid(self, item):
-        publisher_id = item.get('publisher_id', 'unknown')
-        reference_id = item.get('reference_id', 'unknown')
-        hash = hashlib.md5(json.dumps(item).encode()).hexdigest()
-        contentid = '%s.%s.%s' % (publisher_id, reference_id, hash)
-        return contentid
+        return item['content']['id']
 
     def __thumbnail(self, item):
         # ファイルパス
-        imagefile = os.path.join(Const.CACHE_PATH, '%s.png' % self.__contentid(item))
+        imagefile = os.path.join(
+            Const.CACHE_PATH, '%s.png' % self.__contentid(item))
         if os.path.isfile(imagefile) and os.path.getsize(imagefile) < 1000:
             # delete imagefile
             os.remove(imagefile)
@@ -326,7 +317,8 @@ class Browse:
         if os.path.isfile(imagefile):
             pass
         else:
-            buffer = urlread(item['images'][0]['small'])
+            buffer = urlread(
+                'https://statics.tver.jp/images/content/thumbnail/episode/small/%s.jpg' % item['content']['id'])
             image = Image.open(io.BytesIO(buffer))  # 320x180
             image = image.resize((216, 122))
             background = Image.new('RGB', (216, 216), (0, 0, 0))
@@ -337,14 +329,14 @@ class Browse:
     def __add_item(self, item):
         # 番組情報を付加
         s = item['_summary'] = {
-            'title': item.get('title', 'n/a'),
-            'url': 'https://tver.jp%s' % item['href'],
+            'title': item['content'].get('seriesTitle', '') + item['content'].get('title', 'n/a'),
+            'url': 'https://tver.jp/episodes/%s' % item['content']['id'],
             'date': self.__date(item),
-            'description': item.get('subtitle', ''),
+            'description': item['content'].get('seriesTitle', '') + item['content'].get('title', 'n/a'),
             'source': item.get('media', 'n/a'),
             'category': '',
             'duration': '',
-            'thumbnail': item['images'][0]['small'],
+            'thumbnail': 'https://statics.tver.jp/images/content/thumbnail/episode/small/%s.jpg' % item['content']['id'],
             'thumbfile': self.__thumbnail(item),
             'contentid': self.__contentid(item),
         }
@@ -356,19 +348,25 @@ class Browse:
             'studio': s['source'],
             'date': self.__labeldate(s['date']),
         }
-        listitem = xbmcgui.ListItem(item['title'])
-        listitem.setArt({'icon': s['thumbnail'], 'thumb': s['thumbnail'], 'poster': s['thumbnail']})
+        listitem = xbmcgui.ListItem(s['title'])
+        listitem.setArt(
+            {'icon': s['thumbnail'], 'thumb': s['thumbnail'], 'poster': s['thumbnail']})
         listitem.setInfo(type='video', infoLabels=labels)
         listitem.setProperty('IsPlayable', 'true')
         # context menu
         contextmenu = []
         contextmenu += [(Const.STR(30938), 'Action(Info)')]  # 詳細情報
         contextmenu += self.downloader.contextmenu(item)  # ダウンロード追加/削除
-        contextmenu += [(Const.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])]  # トップに戻る
-        contextmenu += [(Const.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])]  # アドオン設定
+        # トップに戻る
+        contextmenu += [(Const.STR(30936),
+                         'Container.Update(%s,replace)' % sys.argv[0])]
+        # アドオン設定
+        contextmenu += [(Const.STR(30937),
+                         'RunPlugin(%s?action=settings)' % sys.argv[0])]
         listitem.addContextMenuItems(contextmenu, replaceItems=True)
         # add directory item
-        url = '%s?action=%s&url=%s' % (sys.argv[0], 'play', quote_plus(s['url']))
+        url = '%s?action=%s&url=%s' % (
+            sys.argv[0], 'play', quote_plus(s['url']))
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, False)
 
     def __add_directory_item(self, name, query, action, iconimage=''):
@@ -378,9 +376,14 @@ class Browse:
         # context menu
         contextmenu = []
         if query:
-            contextmenu += [(Const.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])]  # トップに戻る
-        contextmenu += [(Const.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])]  # アドオン設定
+            # トップに戻る
+            contextmenu += [(Const.STR(30936),
+                             'Container.Update(%s,replace)' % sys.argv[0])]
+        # アドオン設定
+        contextmenu += [(Const.STR(30937),
+                         'RunPlugin(%s?action=settings)' % sys.argv[0])]
         listitem.addContextMenuItems(contextmenu, replaceItems=True)
         # add directory item
-        url = '%s?action=%s&query=%s' % (sys.argv[0], action, quote_plus(query))
+        url = '%s?action=%s&query=%s' % (
+            sys.argv[0], action, quote_plus(query))
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, True)

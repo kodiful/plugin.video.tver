@@ -19,7 +19,7 @@ class Downloader:
         self.local_addon = xbmcaddon.Addon()
         self.local_id = self.local_addon.getAddonInfo('id')
         try:
-            self.remote_id = 'plugin.video.downloader'
+            self.remote_id = 'plugin.video.tver'
             self.remote_addon = xbmcaddon.Addon(self.remote_id)
             self.download_path = self.remote_addon.getSetting('download_path')
             self.cache_path = os.path.join(xbmcvfs.translatePath(

@@ -86,7 +86,7 @@ msgstr "NHK"
 
 msgctxt "#30820"
 msgid "All"
-msgstr "[COLOR lightgreen]すべての日付[/COLOR]"
+msgstr "[COLOR lightgreen]すべての曜日[/COLOR]"
 
 msgctxt "#30919"
 msgid "%m/%d(%%s)"
@@ -98,7 +98,7 @@ msgstr "月,火,水,木,金,土,日"
 
 msgctxt "#30933"
 msgid "[COLOR lightgreen]Search:Date[/COLOR]"
-msgstr "[COLOR lightgreen]検索:日付[/COLOR]"
+msgstr "[COLOR lightgreen]検索:曜日[/COLOR]"
 
 msgctxt "#30934"
 msgid "[COLOR lightgreen]Search:Channel[/COLOR]"

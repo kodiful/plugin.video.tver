@@ -53,11 +53,15 @@ def urlread(url, *headers):
     opener = build_opener()
     # User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:68.0) Gecko/20100101 Firefox/68.0
     h = [('User-Agent', 'Mozilla/5.0')]
+    data = None
     for header in headers:
-        h.append(header)
+        if header[0] == 'data':
+            data = header[1]
+        else:
+            h.append(header)
     opener.addheaders = h
     try:
-        response = opener.open(url)
+        response = opener.open(url, data)
         buf = response.read()
         response.close()
     except HTTPError as e:

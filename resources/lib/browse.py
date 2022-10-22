@@ -29,7 +29,7 @@ from resources.lib.downloader import Downloader
 
 class Browse:
 
-    def __init__(self, query='bc=all&genre=all&bc=all'):
+    def __init__(self, query='bc=all&genre=all'):
         self.query = query
         self.args, _ = self.update_query(self.query)
         self.downloader = Downloader()
@@ -61,6 +61,7 @@ class Browse:
         name = Const.STR(30820)
         # 月,火,水,木,金,土,日
         w = Const.STR(30920).split(',')
+        w_en = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
         # 次のアクション
         if self.args.get('bc') is None:
             action = 'setchannel'
@@ -71,22 +72,16 @@ class Browse:
         _, query = self.update_query(self.query, {'date': ''})
         self.__add_directory_item(
             name, query, action, iconimage=Const.CALENDAR)
-        # 直近30日分のメニューを追加
-        for i in range(30):
-            d = datetime.date.today() - datetime.timedelta(i)
-            wd = d.weekday()
-            # 8月31日(土)
-            # date1 = d.strftime(Const.STR(30919)) % w[wd]
-            date1 = strftime(d, Const.STR(30919)) % w[wd]
-            # 2019-08-31
-            date2 = d.strftime('%Y-%m-%d')
-            if isholiday(date2) or wd == 6:
+        # 曜日のメニューを追加
+        for wd in range(7):
+            date1 = w[wd]
+            if wd == 6:
                 name = '[COLOR red]%s[/COLOR]' % date1
             elif wd == 5:
                 name = '[COLOR blue]%s[/COLOR]' % date1
             else:
                 name = date1
-            _, query = self.update_query(self.query, {'date': date2})
+            _, query = self.update_query(self.query, {'date': w_en[wd]})
             self.__add_directory_item(
                 name, query, action, iconimage=Const.CALENDAR)
         # end of directory
@@ -95,12 +90,12 @@ class Browse:
     def show_channel(self):
         bc_list = [
             ('', Const.STR(30810)),
-            ('ntv', Const.STR(30811)),
-            ('ex', Const.STR(30812)),
-            ('tbs', Const.STR(30813)),
-            ('tx', Const.STR(30814)),
-            ('cx', Const.STR(30815)),
-            ('nhk', Const.STR(30816)),
+            ('nns', Const.STR(30811)),
+            ('exnetwork', Const.STR(30812)),
+            ('jnn', Const.STR(30813)),
+            ('txn', Const.STR(30814)),
+            ('fns', Const.STR(30815)),
+            ('nhknet', Const.STR(30816)),
         ]
         for id, name in bc_list:
             # 次のアクション
@@ -118,10 +113,9 @@ class Browse:
 
     def show_genre(self):
         genre_list = [
-            ('', Const.STR(30800)),
             ('drama', Const.STR(30801)),
             ('variety', Const.STR(30802)),
-            ('documentary', Const.STR(30803)),
+            ('news_documentary', Const.STR(30803)),
             ('anime', Const.STR(30804)),
             ('sport', Const.STR(30805)),
             ('other', Const.STR(30806)),
@@ -142,15 +136,23 @@ class Browse:
 
     def search(self):
         # トークンを取得
-        url = 'https://tver.jp/api/access_token.php'
-        buf = urlread(url)
+        url = 'https://platform-api.tver.jp/v2/api/platform_users/browser/create'
+        buf = urlread(url, ('data', b'device_type=pc'),
+                      ('Origin', 'https://s.tver.jp'),
+                      ('Referer', 'https://s.tver.jp/'),
+                      ('Content-Type', 'application/x-www-form-urlencoded'))
         jso = json.loads(buf)
-        token = jso.get('token', '')
+        platform_uid = jso.get('result', []).get('platform_uid')
+        platform_token = jso.get('result', []).get('platform_token')
+        filter_key = list(
+            filter(None, [self.args.get('date'), self.args.get('bc')]))
         # 番組検索
-        url = 'https://api.tver.jp/v4/search?catchup=1&%s&token=%s' % (
-            self.query, token)
-        buf = urlread(url)
-        datalist = json.loads(buf).get('data', [])
+        url = 'https://platform-api.tver.jp/service/api/v1/callTagSearch/%s?filterKey=%s&sortKey=open_at&require_data=later&platform_uid=%s&platform_token=%s' % (
+            self.args.get('genre'), ','.join(filter_key), platform_uid, platform_token)
+        buf = urlread(url, ('Origin', 'https://s.tver.jp'),
+                      ('Referer', 'https://s.tver.jp/'),
+                      ('x-tver-platform-type', 'web'))
+        datalist = json.loads(buf).get('result', []).get('contents', [])
         datadict = {}
         for data in sorted(datalist, key=lambda item: self.__date(item), reverse=True):
             '''
@@ -289,7 +291,7 @@ class Browse:
 
     def __date(self, item):
         # データの時刻情報
-        itemdate = item.get('date', '')
+        itemdate = item.get('broadcastDateLabel', '')
         # 現在時刻
         now = datetime.datetime.now()
         year0 = now.strftime('%Y')
@@ -320,11 +322,7 @@ class Browse:
         return date
 
     def __contentid(self, item):
-        publisher_id = item.get('publisher_id', 'unknown')
-        reference_id = item.get('reference_id', 'unknown')
-        hash = hashlib.md5(json.dumps(item).encode()).hexdigest()
-        contentid = '%s.%s.%s' % (publisher_id, reference_id, hash)
-        return contentid
+        return item['content']['id']
 
     def __thumbnail(self, item):
         # ファイルパス
@@ -343,7 +341,8 @@ class Browse:
         if os.path.isfile(imagefile):
             pass
         else:
-            buffer = urlread(item['images'][0]['small'])
+            buffer = urlread(
+                'https://statics.tver.jp/images/content/thumbnail/episode/small/%s.jpg' % item['content']['id'])
             image = Image.open(io.BytesIO(buffer))  # 320x180
             image = image.resize((216, 122))
             background = Image.new('RGB', (216, 216), (0, 0, 0))
@@ -354,14 +353,14 @@ class Browse:
     def __add_item(self, item):
         # 番組情報を付加
         s = item['_summary'] = {
-            'title': item.get('title', 'n/a'),
-            'url': 'https://tver.jp%s' % item['href'],
+            'title': item['content'].get('seriesTitle', '') + item['content'].get('title', 'n/a'),
+            'url': 'https://tver.jp/episodes/%s' % item['content']['id'],
             'date': self.__date(item),
-            'description': item.get('subtitle', ''),
+            'description': item['content'].get('seriesTitle', '') + item['content'].get('title', 'n/a'),
             'source': item.get('media', 'n/a'),
             'category': '',
             'duration': '',
-            'thumbnail': item['images'][0]['small'],
+            'thumbnail': 'https://statics.tver.jp/images/content/thumbnail/episode/small/%s.jpg' % item['content']['id'],
             'thumbfile': self.__thumbnail(item),
             'contentid': self.__contentid(item),
         }
@@ -373,7 +372,7 @@ class Browse:
             'studio': s['source'],
             'date': self.__labeldate(s['date']),
         }
-        listitem = xbmcgui.ListItem(item['title'])
+        listitem = xbmcgui.ListItem(s['title'])
         listitem.setArt(
             {'icon': s['thumbnail'], 'thumb': s['thumbnail'], 'poster': s['thumbnail']})
         listitem.setInfo(type='video', infoLabels=labels)

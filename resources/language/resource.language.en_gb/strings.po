@@ -84,8 +84,36 @@ msgctxt "#30816"
 msgid "NHK"
 msgstr ""
 
-msgctxt "#30820"
+msgctxt "#30830"
 msgid "All"
+msgstr ""
+
+msgctxt "#30831"
+msgid "MON"
+msgstr ""
+
+msgctxt "#30832"
+msgid "TUE"
+msgstr ""
+
+msgctxt "#30833"
+msgid "WED"
+msgstr ""
+
+msgctxt "#30834"
+msgid "THU"
+msgstr ""
+
+msgctxt "#30835"
+msgid "FRI"
+msgstr ""
+
+msgctxt "#30836"
+msgid "SAT"
+msgstr ""
+
+msgctxt "#30837"
+msgid "SUN"
 msgstr ""
 
 msgctxt "#30919"
@@ -97,7 +125,7 @@ msgid "Mon,Tue,Wed,Thu,Fri,Sat,Sun"
 msgstr ""
 
 msgctxt "#30933"
-msgid "[COLOR lightgreen]Search:Date[/COLOR]"
+msgid "[COLOR lightgreen]Search:Weekday[/COLOR]"
 msgstr ""
 
 msgctxt "#30934"

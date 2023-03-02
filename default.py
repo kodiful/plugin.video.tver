@@ -58,12 +58,12 @@ if __name__ == '__main__':
         Browse().show_top()
 
     # select date
-    elif action == 'setdate':
-        Browse(query).show_date()
+    elif action == 'setweekday':
+        Browse(query).show_weekday()
 
     # select channel
-    elif action == 'setchannel':
-        Browse(query).show_channel()
+    elif action == 'settvnetwork':
+        Browse(query).show_tvnetwork()
 
     # select genre
     elif action == 'setgenre':

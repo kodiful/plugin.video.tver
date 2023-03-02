@@ -84,9 +84,37 @@ msgctxt "#30816"
 msgid "NHK"
 msgstr "NHK"
 
-msgctxt "#30820"
+msgctxt "#30830"
 msgid "All"
-msgstr "[COLOR lightgreen]すべての日付[/COLOR]"
+msgstr "[COLOR lightgreen]すべての曜日[/COLOR]"
+
+msgctxt "#30831"
+msgid "MON"
+msgstr "月曜日"
+
+msgctxt "#30832"
+msgid "TUE"
+msgstr "火曜日"
+
+msgctxt "#30833"
+msgid "WED"
+msgstr "水曜日"
+
+msgctxt "#30834"
+msgid "THU"
+msgstr "木曜日"
+
+msgctxt "#30835"
+msgid "FRI"
+msgstr "金曜日"
+
+msgctxt "#30836"
+msgid "SAT"
+msgstr "土曜日"
+
+msgctxt "#30837"
+msgid "SUN"
+msgstr "日曜日"
 
 msgctxt "#30919"
 msgid "%m/%d(%%s)"
@@ -97,8 +125,8 @@ msgid "Mon,Tue,Wed,Thu,Fri,Sat,Sun"
 msgstr "月,火,水,木,金,土,日"
 
 msgctxt "#30933"
-msgid "[COLOR lightgreen]Search:Date[/COLOR]"
-msgstr "[COLOR lightgreen]検索:日付[/COLOR]"
+msgid "[COLOR lightgreen]Search:Weekday[/COLOR]"
+msgstr "[COLOR lightgreen]検索:曜日[/COLOR]"
 
 msgctxt "#30934"
 msgid "[COLOR lightgreen]Search:Channel[/COLOR]"

@@ -44,7 +44,7 @@ class Downloader:
     def __save(self, contentid, item):
         json_file = self.__jsonfile(contentid)
         if not os.path.isfile(json_file):
-            with open(json_file, 'w') as f:
+            with open(json_file, 'w', encoding='utf-8') as f:
                 json_data = json.dumps(item, indent=4, ensure_ascii=False, sort_keys=True)
                 f.write(json_data)
         return json_file

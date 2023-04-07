@@ -1,7 +1,7 @@
 ## Kodiアドオン：TVerクライアント
 
 [Tver](https://tver.jp)を操作するためのKodiアドオンです。
-macOSで操作検証しています。
+macOSで動作検証しています。
 
 ### 目次
 

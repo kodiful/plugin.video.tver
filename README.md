@@ -12,15 +12,15 @@ macOSで操作検証しています。
 
 起動するとホーム画面が表示されます。
 
-![ホーム画面](https://user-images.githubusercontent.com/12268536/230534851-1b9a872d-ffb1-43a4-9240-b05d05d70c51.png)
+![ホーム画面](https://user-images.githubusercontent.com/12268536/230548802-fd22bccb-c7d3-45f7-81f9-bce01c146c13.png)
 
 画面の各項目の内容は以下の通りです。
 
-#### 検索：日付
+#### 検索：曜日
 
-ガラポンTV端末に録画されている番組を検索します。日付→チャンネル→ジャンルの順に検索条件を設定します。まず、日付を選択します。
+番組を検索します。曜日→チャンネル→ジャンルの順に検索条件を設定します。まず、曜日を選択します。
 
-![日付選択画面](https://user-images.githubusercontent.com/12268536/230534931-092137ac-a3e2-454e-abe3-2e12308c6827.png)
+![曜日選択画面](https://user-images.githubusercontent.com/12268536/230548653-043125df-38e6-4b25-a0ad-3bcc76fe7ec1.png)
 
 次にチャンネルを選択します。
 

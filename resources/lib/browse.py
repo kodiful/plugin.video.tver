@@ -153,8 +153,15 @@ class Browse:
         #     "playerID": "MfxS5MXtZ",
         #     "channelID": "ex"
         # },
+        # "video": {
+        #     "videoID": "6322519809112",
+        #     "accountID": "3971130137001",
+        #     "playerID": "Eyc2R2Jow",
+        #     "channelID": "tx"
+        # },
         video = episode.get('video')
         videoRefID = video.get('videoRefID')
+        videoID = video.get('videoID')
         accountID = video.get('accountID')
         playerID = video.get('playerID')
         # ポリシーキーを取得
@@ -164,7 +171,12 @@ class Browse:
         # {accountId:"4394098883001",policyKey:"BCpkADawqM2XqfdZX45o9xMUoyUbUrkEjt-dMFupSdYwCw6YH7Dgd_Aj4epNSPEGgyBOFGHmLa_IPqbf8qv8CWSZaI_8Cd8xkpoMSNkyZrzzX7_TGRmVjAmZ_q_KxemVvC2gsMyfCqCzRrRx"}        
         policykey = re.search(r'options:\{accountId:"(.*?)",policyKey:"(.*?)"\}', buf.decode()).group(2)
         # playbackをダウンロード
-        url = f'https://edge.api.brightcove.com/playback/v1/accounts/{accountID}/videos/ref%3A{videoRefID}'
+        if videoRefID:
+            # https://edge.api.brightcove.com/playback/v1/accounts/4394098883001/videos/ref%3A18_1390_39076
+            url = f'https://edge.api.brightcove.com/playback/v1/accounts/{accountID}/videos/ref%3A{videoRefID}'
+        elif videoID:
+            # https://edge.api.brightcove.com/playback/v1/accounts/3971130137001/videos/6322259035112?config_id=f0876aa7-0bab-4049-ab23-1b2001ff7c79
+            url = f'https://edge.api.brightcove.com/playback/v1/accounts/{accountID}/videos/{videoID}'
         buf = urlread(url, ('accept', f'application/json;pk={policykey}'))
         playback = json.loads(buf)
         sources = playback.get('sources')

@@ -16,6 +16,22 @@ msgstr ""
 "Language: ja_JP\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgctxt "#30000"
+msgid "Smartlist Settings"
+msgstr "スマートリスト"
+
+msgctxt "#30005"
+msgid "Keyword"
+msgstr "キーワード"
+
+msgctxt "#30006"
+msgid "[COLOR lightgreen]Add Smartlist[/COLOR]"
+msgstr "[COLOR lightgreen]スマートリストを追加[/COLOR]"
+
+msgctxt "#30007"
+msgid "[COLOR lightgreen]Change Smartlist[/COLOR]"
+msgstr "[COLOR lightgreen]スマートリストを変更[/COLOR]"
+
 msgctxt "#30200"
 msgid "Settings"
 msgstr "設定"
@@ -115,6 +131,18 @@ msgstr "土曜日"
 msgctxt "#30837"
 msgid "SUN"
 msgstr "日曜日"
+
+msgctxt "#30903"
+msgid "Add as smartlist"
+msgstr "スマートリストに追加"
+
+msgctxt "#30904"
+msgid "Edit smartlist"
+msgstr "スマートリストを編集"
+
+msgctxt "#30905"
+msgid "Remove smartlist"
+msgstr "スマートリストを削除"
 
 msgctxt "#30919"
 msgid "%m/%d(%%s)"

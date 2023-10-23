@@ -7,6 +7,7 @@ import xbmcaddon
 
 from resources.lib.common import *
 from resources.lib.browse import Browse
+from resources.lib.smartlist import SmartList
 
 # HTTP接続におけるタイムアウト(秒)
 import socket
@@ -17,7 +18,6 @@ class Cache():
 
     def __init__(self):
         self.files = os.listdir(Const.CACHE_PATH)
-        log(len(self.files))
 
     def clear(self):
         for file in self.files:
@@ -33,7 +33,6 @@ class Cache():
                 size = size + os.path.getsize(os.path.join(Const.CACHE_PATH, file))
             except Exception:
                 pass
-        log(size)
         if size > 1024 * 1024:
             Const.SET('cache', '%.1f MB / %d files' % (size / 1024 / 1024, len(self.files)))
         elif size > 1024:
@@ -92,3 +91,23 @@ if __name__ == '__main__':
         Cache().update()
         # open settings
         xbmc.executebuiltin('Addon.OpenSettings(%s)' % xbmcaddon.Addon().getAddonInfo('id'))
+
+    # smartlist
+    elif action == 'beginEditSmartList':
+        keyword = args.get('keyword')
+        edit = args.get('edit')
+        SmartList().beginEdit(keyword, edit)
+        # open settings & focus smartlist category
+        xbmc.executebuiltin('Addon.OpenSettings(%s)' % xbmcaddon.Addon().getAddonInfo('id'))
+        xbmc.executebuiltin('SetFocus(-99)')
+
+    elif action == 'endEditSmartList':
+        SmartList().endEdit()
+        # refresh top page
+        xbmc.executebuiltin('Container.Update(%s,replace)' % sys.argv[0])
+
+    elif action == 'deleteSmartList':
+        keyword = args.get('keyword')
+        SmartList().delete(keyword)
+        # refresh top page
+        xbmc.executebuiltin('Container.Update(%s,replace)' % sys.argv[0])

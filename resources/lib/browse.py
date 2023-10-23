@@ -17,12 +17,10 @@ from urllib.parse import quote_plus
 from urllib.parse import parse_qs
 from PIL import Image
 
-try:
-    from sqlite3 import dbapi2 as sqlite
-except Exception:
-    from pysqlite2 import dbapi2 as sqlite
+from sqlite3 import dbapi2 as sqlite
 
 from resources.lib.common import *
+from resources.lib.smartlist import SmartList
 from resources.lib.downloader import Downloader
 
 
@@ -31,6 +29,7 @@ class Browse:
     def __init__(self, query='weekday=all&tvnetwork=all&genre=all'):
         self.query = query
         self.args, _ = self.update_query(self.query)
+        self.smartlist = SmartList()
         self.downloader = Downloader()
 
     def update_query(self, query, values=None):
@@ -49,6 +48,9 @@ class Browse:
         self.__add_directory_item(name=Const.STR(30935), query='', action='setgenre', iconimage=Const.CATEGORIZE)
         # ダウンロード
         self.downloader.top(Const.DOWNLOADS)
+        # スマートリスト
+        for item in SmartList().getList():
+            self.__add_smartlist(item['keyword'], iconimage=Const.BROWSE_FOLDER)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -124,12 +126,19 @@ class Browse:
 
     def search(self):
         # 検索結果取得
+        keyword = self.args.get('keyword', '')
         weekday = self.args.get('weekday', 'all')
         tvnetwork = self.args.get('tvnetwork', 'all')
         genre = self.args.get('genre', 'all')
         keys = list(filter(lambda key: key != 'all', [weekday, tvnetwork, genre]))
-        if len(keys) > 0:
-            url = f'https://service-api.tver.jp/api/v1/callTagSearch/{keys[0]}?filterKey={"%2C".join(keys[1:])}'
+        if keyword:
+            url = f'https://service-api.tver.jp/api/v1/callKeywordSearch?sortKey=score&filterKey={"%2C".join(keys)}&keyword={quote_plus(keyword)}'
+            buf = urlread(url, ('x-tver-platform-type', 'web'))
+            contents = json.loads(buf).get('result').get('contents')
+            if len(contents) > 0:
+                contents = list(filter(lambda x: x['score'] == 10, contents))
+        elif len(keys) > 0:
+            url = f'https://service-api.tver.jp/api/v1/callTagSearch/{keys[0]}?filterKey={"%2C".join(keys[1:])}'            
             buf = urlread(url, ('x-tver-platform-type', 'web'))
             contents = json.loads(buf).get('result').get('contents')
         else:
@@ -193,6 +202,23 @@ class Browse:
         self.downloader.download(url, contentid)
 
     def __add_item(self, item):
+        '''
+        {
+            "id": "epwyjk82m8",
+            "version": 12,
+            "title": "　",
+            "seriesID": "srrao7paa6",
+            "endAt": 1698076920,
+            "broadcastDateLabel": "10月16日(月)放送分",
+            "isNHKContent": false,
+            "isSubtitle": false,
+            "ribbonID": 0,
+            "seriesTitle": "激レアさんを連れてきた。",
+            "isAvailable": true,
+            "broadcasterName": "テレビ朝日",
+            "productionProviderName": "テレビ朝日"
+        }
+        '''
         # ID
         id = item.get('id')
         # 日付
@@ -248,6 +274,7 @@ class Browse:
         # context menu
         contextmenu = []
         contextmenu += [(Const.STR(30938), 'Action(Info)')]  # 詳細情報
+        contextmenu += self.smartlist.contextmenu(sys.argv[0], title, False)  # スマートリストに追加
         contextmenu += self.downloader.contextmenu(item)  # ダウンロード追加/削除
         contextmenu += [(Const.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])]  # トップに戻る
         contextmenu += [(Const.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])]  # アドオン設定
@@ -268,6 +295,19 @@ class Browse:
         listitem.addContextMenuItems(contextmenu, replaceItems=True)
         # add directory item
         url = '%s?action=%s&query=%s' % (sys.argv[0], action, quote_plus(query))
+        xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, True)
+
+    def __add_smartlist(self, keyword, iconimage=''):
+        # listitem
+        listitem = xbmcgui.ListItem(keyword)
+        listitem.setArt({'icon': iconimage})
+        # context menu
+        contextmenu = []
+        contextmenu += self.smartlist.contextmenu(sys.argv[0], keyword, True)  # スマートリストを変更
+        contextmenu += [(Const.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])]  # アドオン設定
+        listitem.addContextMenuItems(contextmenu, replaceItems=True)
+        # add directory item
+        url = '%s?action=search&query=%s' % (sys.argv[0], urlencode({'keyword': keyword}))
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, True)
 
     def __date(self, itemdate):

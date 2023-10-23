@@ -30,6 +30,9 @@ class Const:
     if not os.path.isdir(CACHE_PATH):
         os.makedirs(CACHE_PATH)
 
+    # ファイルパス
+    SMARTLIST_FILE = os.path.join(PROFILE_PATH, 'smatlist.js')
+
     # データベース
     DB_PATH = xbmcvfs.translatePath('special://database')
     CACHE_DB = os.path.join(DB_PATH, 'Textures13.db')
@@ -39,6 +42,7 @@ class Const:
     CALENDAR = os.path.join(IMAGES_PATH, 'icons8-calendar-filled-500.png')
     RADIO_TOWER = os.path.join(IMAGES_PATH, 'icons8-radio-tower-filled-500.png')
     CATEGORIZE = os.path.join(IMAGES_PATH, 'icons8-categorize-filled-500.png')
+    BROWSE_FOLDER = os.path.join(IMAGES_PATH, 'icons8-browse-folder-filled-500.png')
 
 
 # workaround for encode problems for strftime on Windows

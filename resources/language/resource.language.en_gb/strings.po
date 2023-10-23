@@ -16,6 +16,22 @@ msgstr ""
 "Language: en_GB\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgctxt "#30000"
+msgid "Smartlist Settings"
+msgstr ""
+
+msgctxt "#30005"
+msgid "Keyword"
+msgstr ""
+
+msgctxt "#30006"
+msgid "[COLOR lightgreen]Add Smartlist[/COLOR]"
+msgstr ""
+
+msgctxt "#30007"
+msgid "[COLOR lightgreen]Change Smartlist[/COLOR]"
+msgstr ""
+
 msgctxt "#30200"
 msgid "Settings"
 msgstr ""
@@ -114,6 +130,18 @@ msgstr ""
 
 msgctxt "#30837"
 msgid "SUN"
+msgstr ""
+
+msgctxt "#30903"
+msgid "Add as smartlist"
+msgstr ""
+
+msgctxt "#30904"
+msgid "Edit smartlist"
+msgstr ""
+
+msgctxt "#30905"
+msgid "Remove smartlist"
 msgstr ""
 
 msgctxt "#30919"

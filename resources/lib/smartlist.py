@@ -27,7 +27,7 @@ class SmartList():
     def getList(self):
         if os.path.isfile(Const.SMARTLIST_FILE):
             try:
-                with open(Const.SMARTLIST_FILE, 'r') as f:
+                with open(Const.SMARTLIST_FILE, 'r', encoding='utf-8', errors='ignore') as f:
                     smartlist = f.read()
                     smartlist = json.loads(smartlist)
                     return smartlist

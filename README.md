@@ -12,7 +12,7 @@ macOSで動作検証しています。
 
 起動するとホーム画面が表示されます。
 
-![ホーム画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/0d773a2a-510c-48bb-ae71-4b6366b828b9)
+![ホーム画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/b1f86b68-dc81-4b05-b1b0-42bd72380d5e)
 
 画面の各項目の内容は以下の通りです。
 
@@ -20,19 +20,19 @@ macOSで動作検証しています。
 
 番組を検索します。曜日→チャンネル→ジャンルの順に検索条件を設定します。まず、曜日を選択します。
 
-![曜日選択画面](https://user-images.githubusercontent.com/12268536/230548653-043125df-38e6-4b25-a0ad-3bcc76fe7ec1.png)
+![曜日選択画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/bb65ef04-a74f-4d6e-aa8f-64c4a7db74da)
 
 次にチャンネルを選択します。
 
-![チャンネル選択画面](https://user-images.githubusercontent.com/12268536/230534980-f88bd3b0-891b-4505-8bfb-fe94c26aaf9c.png)
+![チャンネル選択画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/5e04044f-b360-4a75-9a3e-fddd46469262)
 
 次にジャンルを選択します。
 
-![ジャンル選択画面](https://user-images.githubusercontent.com/12268536/230535078-fb60aa9c-570e-41ee-b66f-4f1575912a24.png)
+![ジャンル選択画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/02fed91c-680b-47cc-86c1-b190f0de759e)
 
 検索結果が表示されます。
 
-![検索結果画面](https://user-images.githubusercontent.com/12268536/230535119-113b6dbf-ff04-460a-94ab-7ea189c9b398.png)
+![検索結果画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/bd6aa208-346e-4431-96fd-2c84dff6aa76)
 
 ここで見たい番組を選択すると、番組が再生されます（Kodiの設定によっては詳細情報が表示されます）。
 
@@ -44,13 +44,11 @@ macOSで動作検証しています。
 
 検索条件を、ジャンル→チャンネル→曜日の順に設定するほかは「検索：曜日」と同様です。
 
-### アドオン設定
+### アドオン設定-設定
 
 サブメニューから「アドオン設定」を選択して、アドオン設定画面を表示します。
 
-![アドオン設定画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/26b5c6cb-5e12-4555-97be-89a901099c2f)
-
-![アドオン設定画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/29a7be9b-0655-41ba-b4aa-1f269a0c953d)
+![アドオン設定画面-設定](https://github.com/kodiful/plugin.video.tver/assets/12268536/b362ec0f-8d1b-4df6-a05e-e58a7b54e4e2)
 
 画面の各項目の内容は以下の通りです。
 
@@ -61,3 +59,19 @@ macOSで動作検証しています。
 #### デバッグ
 
 デバッグ用の設定です。 動作に関する情報をKodiのログファイルに書き出します。
+
+### アドオン設定-スマートリスト
+
+サブメニューから「アドオン設定」を選択して、アドオン設定画面を表示します。
+
+![アドオン設定画面-スマートリスト](https://github.com/kodiful/plugin.video.tver/assets/12268536/beabfe57-8bb3-4817-98fc-b888b7dce737)
+
+画面の各項目の内容は以下の通りです。
+
+#### キーワード
+
+表示したい番組名に含まれるキーワードを設定します。
+
+#### スマートリストを追加
+
+設定したキーワードを含む番組を検索するボタンをトップページに追加します。

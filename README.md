@@ -12,7 +12,7 @@ macOSで動作検証しています。
 
 起動するとホーム画面が表示されます。
 
-![ホーム画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/58ddf8e5-3c88-4dea-a815-b37bfc58640c)
+![ホーム画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/0d773a2a-510c-48bb-ae71-4b6366b828b9)
 
 画面の各項目の内容は以下の通りです。
 
@@ -48,9 +48,9 @@ macOSで動作検証しています。
 
 サブメニューから「アドオン設定」を選択して、アドオン設定画面を表示します。
 
-![アドオン設定画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/018fa56c-b102-4cbb-9f36-3798b0bcfb39)
+![アドオン設定画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/26b5c6cb-5e12-4555-97be-89a901099c2f)
 
-![アドオン設定画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/71c0d7ae-4c83-4dd3-89d5-a1c7ddfdeaad)
+![アドオン設定画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/29a7be9b-0655-41ba-b4aa-1f269a0c953d)
 
 画面の各項目の内容は以下の通りです。
 

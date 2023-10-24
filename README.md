@@ -12,7 +12,7 @@ macOSで動作検証しています。
 
 起動するとホーム画面が表示されます。
 
-![ホーム画面](https://user-images.githubusercontent.com/12268536/230548802-fd22bccb-c7d3-45f7-81f9-bce01c146c13.png)
+![ホーム画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/c76e04e3-788a-4655-96c4-0999dca42799)
 
 画面の各項目の内容は以下の通りです。
 

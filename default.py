@@ -52,6 +52,10 @@ if __name__ == '__main__':
     if Const.GET('cache') == '':
         Cache().update()
 
+    # スマートリスト設定をクリア
+    keyword = Const.GET('keyword')
+    Const.SET('keyword', '')
+
     # top
     if action == '':
         Browse().show_top()
@@ -102,7 +106,7 @@ if __name__ == '__main__':
         xbmc.executebuiltin('SetFocus(-99)')
 
     elif action == 'endEditSmartList':
-        SmartList().endEdit()
+        SmartList().endEdit(keyword)
         # refresh top page
         xbmc.executebuiltin('Container.Update(%s,replace)' % sys.argv[0])
 

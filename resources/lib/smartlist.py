@@ -47,9 +47,7 @@ class SmartList():
         Const.SET('keyword', keyword)
         Const.SET('edit', edit)
 
-    def endEdit(self):
-        # ダイアログの設定を取得
-        keyword = Const.GET('keyword')
+    def endEdit(self, keyword):
         # 既存のスマートリストから一致するものを削除
         smartlist = list(filter(lambda x: x['keyword'] != keyword, self.getList()))
         # データを追加

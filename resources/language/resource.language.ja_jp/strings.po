@@ -25,7 +25,7 @@ msgid "Restart Kodi"
 msgstr "Kodiを再起動してください"
 
 msgctxt "#30021"
-msgid "Can't start serivice"
+msgid "Can't start service"
 msgstr "サービスを起動できません"
 
 msgctxt "#30022"

@@ -3,14 +3,13 @@
 import sys
 import os
 import json
-
-from urllib.parse import quote_plus
-
 import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
 import xbmcvfs
+
+from urllib.parse import quote_plus
 
 
 class Downloader:

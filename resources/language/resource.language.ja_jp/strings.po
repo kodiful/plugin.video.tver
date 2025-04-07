@@ -16,6 +16,26 @@ msgstr ""
 "Language: ja_JP\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#
+# for startup
+#
+
+msgctxt "#30020"
+msgid "Restart Kodi"
+msgstr "Kodiを再起動してください"
+
+msgctxt "#30021"
+msgid "Can't start serivice"
+msgstr "サービスを起動できません"
+
+msgctxt "#30022"
+msgid "Locate ffmpeg"
+msgstr "ffmpegの場所を指定してください"
+
+#
+#
+#
+
 msgctxt "#30000"
 msgid "Smartlist Settings"
 msgstr "スマートリスト"
@@ -37,10 +57,22 @@ msgid "Settings"
 msgstr "設定"
 
 msgctxt "#30201"
-msgid "[COLOR lightgreen]Clear Thumbnails Cache[/COLOR]"
-msgstr "[COLOR lightgreen]サムネイルキャッシュをクリア[/COLOR]"
+msgid "Path to ffmpeg"
+msgstr "ffmpegのパス"
+
+msgctxt "#30202"
+msgid "Port number"
+msgstr "ポート番号"
+
+msgctxt "#30203"
+msgid "Resolution"
+msgstr "解像度"
 
 msgctxt "#30204"
+msgid "[COLOR lightgreen]Clear cache[/COLOR]"
+msgstr "[COLOR lightgreen]キャッシュをクリア[/COLOR]"
+
+msgctxt "#30205"
 msgid "Debug"
 msgstr "デバッグ"
 

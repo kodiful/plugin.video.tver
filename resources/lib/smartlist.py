@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
+import os
 import json
-
 from urllib.parse import urlencode
 
-from resources.lib.common import *
+from resources.lib.common import Common
 
 
-class SmartList():
+class SmartList(Common):
 
     def __init__(self):
         return
@@ -16,18 +16,18 @@ class SmartList():
         contextmenu = []
         if edit:
             args = {'action': 'beginEditSmartList', 'keyword': keyword, 'edit': keyword}
-            contextmenu += [(Const.STR(30904), 'RunPlugin(%s?%s)' % (url, urlencode(args)))]
+            contextmenu += [(self.STR(30904), 'RunPlugin(%s?%s)' % (url, urlencode(args)))]
             args = {'action': 'deleteSmartList', 'keyword': keyword}
-            contextmenu += [(Const.STR(30905), 'RunPlugin(%s?%s)' % (url, urlencode(args)))]
+            contextmenu += [(self.STR(30905), 'RunPlugin(%s?%s)' % (url, urlencode(args)))]
         else:
             args = {'action': 'beginEditSmartList', 'keyword': keyword, 'edit': ''}
-            contextmenu += [(Const.STR(30903), 'RunPlugin(%s?%s)' % (url, urlencode(args)))]
+            contextmenu += [(self.STR(30903), 'RunPlugin(%s?%s)' % (url, urlencode(args)))]
         return contextmenu
 
     def getList(self):
-        if os.path.isfile(Const.SMARTLIST_FILE):
+        if os.path.isfile(self.SMARTLIST_FILE):
             try:
-                with open(Const.SMARTLIST_FILE, 'r', encoding='utf-8', errors='ignore') as f:
+                with open(self.SMARTLIST_FILE, 'r', encoding='utf-8', errors='ignore') as f:
                     smartlist = f.read()
                     smartlist = json.loads(smartlist)
                     return smartlist
@@ -37,15 +37,15 @@ class SmartList():
             return []
 
     def setList(self, smartlist):
-        with open(Const.SMARTLIST_FILE, 'w', encoding='utf-8', errors='ignore') as f:
+        with open(self.SMARTLIST_FILE, 'w', encoding='utf-8', errors='ignore') as f:
             smartlist = sorted(smartlist, key=lambda item: item['keyword'])
             smartlist = json.dumps(smartlist, sort_keys=True, ensure_ascii=False, indent=4)
             f.write(smartlist)
 
     def beginEdit(self, keyword, edit=''):
         # ダイアログに設定
-        Const.SET('keyword', keyword)
-        Const.SET('edit', edit)
+        self.SET('keyword', keyword)
+        self.SET('edit', edit)
 
     def endEdit(self, keyword):
         # 既存のスマートリストから一致するものを削除

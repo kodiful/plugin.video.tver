@@ -16,6 +16,26 @@ msgstr ""
 "Language: en_GB\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#
+# for startup
+#
+
+msgctxt "#30020"
+msgid "Restart Kodi"
+msgstr ""
+
+msgctxt "#30021"
+msgid "Can't start serivice"
+msgstr ""
+
+msgctxt "#30022"
+msgid "Locate ffmpeg"
+msgstr ""
+
+#
+#
+#
+
 msgctxt "#30000"
 msgid "Smartlist Settings"
 msgstr ""
@@ -37,10 +57,22 @@ msgid "Settings"
 msgstr ""
 
 msgctxt "#30201"
-msgid "[COLOR lightgreen]Clear Thumbnails Cache[/COLOR]"
+msgid "Path to ffmpeg"
+msgstr ""
+
+msgctxt "#30202"
+msgid "Port number"
+msgstr ""
+
+msgctxt "#30203"
+msgid "Resolution"
 msgstr ""
 
 msgctxt "#30204"
+msgid "[COLOR lightgreen]Clear cache[/COLOR]"
+msgstr ""
+
+msgctxt "#30205"
 msgid "Debug"
 msgstr ""
 

@@ -6,11 +6,9 @@ import re
 import datetime
 import json
 import io
-
+import re
 import xbmcgui
 import xbmcplugin
-
-from .common import *
 
 from urllib.parse import urlencode
 from urllib.parse import quote_plus
@@ -19,12 +17,12 @@ from PIL import Image
 
 from sqlite3 import dbapi2 as sqlite
 
-from resources.lib.common import *
+from resources.lib.common import Common
 from resources.lib.smartlist import SmartList
 from resources.lib.downloader import Downloader
 
 
-class Browse:
+class Browse(Common):
 
     def __init__(self, query='weekday=all&tvnetwork=all&genre=all'):
         self.query = query
@@ -41,29 +39,29 @@ class Browse:
 
     def show_top(self):
         # 検索:曜日
-        self.__add_directory_item(name=Const.STR(30933), query='', action='setweekday', iconimage=Const.CALENDAR)
+        self.add_directory_item(name=self.STR(30933), query='', action='setweekday', iconimage=self.CALENDAR)
         # 検索:チャンネル
-        self.__add_directory_item(name=Const.STR(30934), query='', action='settvnetwork', iconimage=Const.RADIO_TOWER)
+        self.add_directory_item(name=self.STR(30934), query='', action='settvnetwork', iconimage=self.RADIO_TOWER)
         # 検索:ジャンル
-        self.__add_directory_item(name=Const.STR(30935), query='', action='setgenre', iconimage=Const.CATEGORIZE)
+        self.add_directory_item(name=self.STR(30935), query='', action='setgenre', iconimage=self.CATEGORIZE)
         # ダウンロード
-        self.downloader.top(Const.DOWNLOADS)
+        self.downloader.top(self.DOWNLOADS)
         # スマートリスト
         for item in SmartList().getList():
-            self.__add_smartlist(item['keyword'], iconimage=Const.BROWSE_FOLDER)
+            self.add_smartlist(item['keyword'], iconimage=self.BROWSE_FOLDER)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
     def show_weekday(self):
         genre_list = [
-            ('all', Const.STR(30830)),
-            ('mon', Const.STR(30831)),
-            ('tue', Const.STR(30832)),
-            ('wed', Const.STR(30833)),
-            ('thu', Const.STR(30834)),
-            ('fri', Const.STR(30835)),
-            ('sat', Const.STR(30836)),
-            ('sun', Const.STR(30837)),
+            ('all', self.STR(30830)),
+            ('mon', self.STR(30831)),
+            ('tue', self.STR(30832)),
+            ('wed', self.STR(30833)),
+            ('thu', self.STR(30834)),
+            ('fri', self.STR(30835)),
+            ('sat', self.STR(30836)),
+            ('sun', self.STR(30837)),
         ]
         for id, name in genre_list:
             # 次のアクション
@@ -74,19 +72,19 @@ class Browse:
             else:
                 action = 'search'
             _, query = self.update_query(self.query, {'weekday': id})
-            self.__add_directory_item(name, query, action, iconimage=Const.CATEGORIZE)
+            self.add_directory_item(name, query, action, iconimage=self.CATEGORIZE)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
     def show_tvnetwork(self):
         tvnetwork_list = [
-            ('all', Const.STR(30810)),
-            ('nns', Const.STR(30811)),
-            ('exnetwork', Const.STR(30812)),
-            ('jnn', Const.STR(30813)),
-            ('txn', Const.STR(30814)),
-            ('fns', Const.STR(30815)),
-            ('nhknet', Const.STR(30816)),
+            ('all', self.STR(30810)),
+            ('nns', self.STR(30811)),
+            ('exnetwork', self.STR(30812)),
+            ('jnn', self.STR(30813)),
+            ('txn', self.STR(30814)),
+            ('fns', self.STR(30815)),
+            ('nhknet', self.STR(30816)),
         ]
         for id, name in tvnetwork_list:
             # 次のアクション
@@ -97,19 +95,19 @@ class Browse:
             else:
                 action = 'search'
             _, query = self.update_query(self.query, {'tvnetwork': id})
-            self.__add_directory_item(name, query, action, iconimage=Const.RADIO_TOWER)
+            self.add_directory_item(name, query, action, iconimage=self.RADIO_TOWER)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
     def show_genre(self):
         genre_list = [
-            ('all', Const.STR(30800)),
-            ('drama', Const.STR(30801)),
-            ('variety', Const.STR(30802)),
-            ('news_documentary', Const.STR(30803)),
-            ('anime', Const.STR(30804)),
-            ('sports', Const.STR(30805)),
-            ('other', Const.STR(30806)),
+            ('all', self.STR(30800)),
+            ('drama', self.STR(30801)),
+            ('variety', self.STR(30802)),
+            ('news_documentary', self.STR(30803)),
+            ('anime', self.STR(30804)),
+            ('sports', self.STR(30805)),
+            ('other', self.STR(30806)),
         ]
         for id, name in genre_list:
             # 次のアクション
@@ -120,7 +118,7 @@ class Browse:
             else:
                 action = 'search'
             _, query = self.update_query(self.query, {'genre': id})
-            self.__add_directory_item(name, query, action, iconimage=Const.CATEGORIZE)
+            self.add_directory_item(name, query, action, iconimage=self.CATEGORIZE)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -133,75 +131,57 @@ class Browse:
         keys = list(filter(lambda key: key != 'all', [weekday, tvnetwork, genre]))
         if keyword:
             url = f'https://service-api.tver.jp/api/v1/callKeywordSearch?sortKey=score&filterKey={"%2C".join(keys)}&keyword={quote_plus(keyword)}'
-            buf = urlread(url, ('x-tver-platform-type', 'web'))
+            buf = self.request(url, {'x-tver-platform-type': 'web'})
             contents = json.loads(buf).get('result').get('contents')
             if len(contents) > 0:
                 contents = list(filter(lambda x: x['score'] == 10, contents))
         elif len(keys) > 0:
             url = f'https://service-api.tver.jp/api/v1/callTagSearch/{keys[0]}?filterKey={"%2C".join(keys[1:])}'            
-            buf = urlread(url, ('x-tver-platform-type', 'web'))
+            buf = self.request(url, {'x-tver-platform-type': 'web'})
             contents = json.loads(buf).get('result').get('contents')
         else:
             url = f'https://service-api.tver.jp/api/v1/callNewerDetail/all'
-            buf = urlread(url, ('x-tver-platform-type', 'web'))
+            buf = self.request(url, {'x-tver-platform-type': 'web'})
             contents = json.loads(buf).get('result').get('contents').get('contents')
         # 表示
-        for data in sorted(contents, key=lambda data: self.__date(data.get('content').get('broadcastDateLabel')), reverse=True):
-            self.__add_item(data.get('content'))
+        for data in sorted(contents, key=lambda data: self._extract_date(data.get('content').get('broadcastDateLabel')), reverse=True):
+            self.add_item(data.get('content'))
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
-    def __url(self, url):
-        # episodeをダウンロード
-        # https://statics.tver.jp/content/episode/epv3o3rrpl.json?v=18
-        buf = urlread(url)
-        episode = json.loads(buf)
-        # "video": {
-        #     "videoRefID": "37255_37254_38777",
-        #     "accountID": "4394098883001",
-        #     "playerID": "MfxS5MXtZ",
-        #     "channelID": "ex"
-        # },
-        # "video": {
-        #     "videoID": "6322519809112",
-        #     "accountID": "3971130137001",
-        #     "playerID": "Eyc2R2Jow",
-        #     "channelID": "tx"
-        # },
-        video = episode.get('video')
-        videoRefID = video.get('videoRefID')
-        videoID = video.get('videoID')
-        accountID = video.get('accountID')
-        playerID = video.get('playerID')
-        # ポリシーキーを取得
-        #　https://players.brightcove.net/4394098883001/MfxS5MXtZ_default/index.min.js
-        url = f'https://players.brightcove.net/{accountID}/{playerID}_default/index.min.js'
-        buf = urlread(url)
-        # {accountId:"4394098883001",policyKey:"BCpkADawqM2XqfdZX45o9xMUoyUbUrkEjt-dMFupSdYwCw6YH7Dgd_Aj4epNSPEGgyBOFGHmLa_IPqbf8qv8CWSZaI_8Cd8xkpoMSNkyZrzzX7_TGRmVjAmZ_q_KxemVvC2gsMyfCqCzRrRx"}        
-        policykey = re.search(r'options:\{accountId:"(.*?)",policyKey:"(.*?)"\}', buf.decode()).group(2)
-        # playbackをダウンロード
-        if videoRefID:
-            # https://edge.api.brightcove.com/playback/v1/accounts/4394098883001/videos/ref%3A18_1390_39076
-            url = f'https://edge.api.brightcove.com/playback/v1/accounts/{accountID}/videos/ref%3A{videoRefID}'
-        elif videoID:
-            # https://edge.api.brightcove.com/playback/v1/accounts/3971130137001/videos/6322259035112?config_id=f0876aa7-0bab-4049-ab23-1b2001ff7c79
-            url = f'https://edge.api.brightcove.com/playback/v1/accounts/{accountID}/videos/{videoID}'
-        buf = urlread(url, ('accept', f'application/json;pk={policykey}'))
-        playback = json.loads(buf)
-        sources = playback.get('sources')
-        filtered = filter(lambda source: source.get('ext_x_version') and source.get('src').startswith('https://'), sources)
-        url = list(filtered)[-1].get('src')
-        return url
+    def download(self, url, id):
+        port = self.GET('port')
+        url = f'http://127.0.0.1:{port}/download?{id}'
+        self.downloader.download(url, id)
 
-    def play(self, url):
-        url = self.__url(url)
-        xbmcplugin.setResolvedUrl(int(sys.argv[1]), succeeded=True, listitem=xbmcgui.ListItem(path=url))
+    def add_directory_item(self, name, query, action, iconimage=''):
+        # listitem
+        listitem = xbmcgui.ListItem(name)
+        listitem.setArt({'icon': iconimage})
+        # context menu
+        contextmenu = []
+        if query:
+            contextmenu += [(self.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])]  # トップに戻る
+        contextmenu += [(self.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])]  # アドオン設定
+        listitem.addContextMenuItems(contextmenu, replaceItems=True)
+        # add directory item
+        url = '%s?action=%s&query=%s' % (sys.argv[0], action, quote_plus(query))
+        xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, True)
 
-    def download(self, url, contentid):
-        url = self.__url(url)
-        self.downloader.download(url, contentid)
+    def add_smartlist(self, keyword, iconimage=''):
+        # listitem
+        listitem = xbmcgui.ListItem(keyword)
+        listitem.setArt({'icon': iconimage})
+        # context menu
+        contextmenu = []
+        contextmenu += self.smartlist.contextmenu(sys.argv[0], keyword, True)  # スマートリストを変更
+        contextmenu += [(self.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])]  # アドオン設定
+        listitem.addContextMenuItems(contextmenu, replaceItems=True)
+        # add directory item
+        url = '%s?action=search&query=%s' % (sys.argv[0], urlencode({'keyword': keyword}))
+        xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, True)
 
-    def __add_item(self, item):
+    def add_item(self, item):
         '''
         {
             "id": "epwyjk82m8",
@@ -243,14 +223,12 @@ class Browse:
         broadcasterName = item.get('broadcasterName')
         # サムネイル
         #thumbnail = f'https://statics.tver.jp/images/content/thumbnail/episode/small/{id}.jpg'
-        thumbnail = self.__thumbnail(id)
-        # URL
-        url = f'https://statics.tver.jp/content/episode/{id}.json'
+        thumbnail = self._create_thumbnail(id)
         # 番組情報
         pg = item['_summary'] = {
             'title': title,
-            'url': url,
-            'date': self.__date(date),
+            'url': f'https://statics.tver.jp/content/episode/{id}.json',
+            'date': self._extract_date(date),
             'description': description,
             'source': broadcasterName,
             'category': '',
@@ -265,7 +243,7 @@ class Browse:
             'plot': pg['description'],
             'plotoutline': pg['description'],
             'studio': pg['source'],
-            'date': self.__labeldate(pg['date']),
+            'date': self._convert_date(pg['date']),
         }
         listitem = xbmcgui.ListItem(pg['title'])
         listitem.setArt({'icon': pg['thumbnail'], 'thumb': pg['thumbnail'], 'poster': pg['thumbnail']})
@@ -273,44 +251,17 @@ class Browse:
         listitem.setProperty('IsPlayable', 'true')
         # context menu
         contextmenu = []
-        contextmenu += [(Const.STR(30938), 'Action(Info)')]  # 詳細情報
+        contextmenu += [(self.STR(30938), 'Action(Info)')]  # 詳細情報
         contextmenu += self.smartlist.contextmenu(sys.argv[0], title, False)  # スマートリストに追加
         contextmenu += self.downloader.contextmenu(item)  # ダウンロード追加/削除
-        contextmenu += [(Const.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])]  # トップに戻る
-        contextmenu += [(Const.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])]  # アドオン設定
+        contextmenu += [(self.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])]  # トップに戻る
+        contextmenu += [(self.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])]  # アドオン設定
         listitem.addContextMenuItems(contextmenu, replaceItems=True)
         # add directory item
-        url = '%s?action=%s&url=%s' % (sys.argv[0], 'play', quote_plus(pg['url']))
-        xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, False)
+        port = self.GET('port')
+        xbmcplugin.addDirectoryItem(int(sys.argv[1]), f'http://127.0.0.1:{port}/play?{id}', listitem, False)
 
-    def __add_directory_item(self, name, query, action, iconimage=''):
-        # listitem
-        listitem = xbmcgui.ListItem(name)
-        listitem.setArt({'icon': iconimage})
-        # context menu
-        contextmenu = []
-        if query:
-            contextmenu += [(Const.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])]  # トップに戻る
-        contextmenu += [(Const.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])]  # アドオン設定
-        listitem.addContextMenuItems(contextmenu, replaceItems=True)
-        # add directory item
-        url = '%s?action=%s&query=%s' % (sys.argv[0], action, quote_plus(query))
-        xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, True)
-
-    def __add_smartlist(self, keyword, iconimage=''):
-        # listitem
-        listitem = xbmcgui.ListItem(keyword)
-        listitem.setArt({'icon': iconimage})
-        # context menu
-        contextmenu = []
-        contextmenu += self.smartlist.contextmenu(sys.argv[0], keyword, True)  # スマートリストを変更
-        contextmenu += [(Const.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])]  # アドオン設定
-        listitem.addContextMenuItems(contextmenu, replaceItems=True)
-        # add directory item
-        url = '%s?action=search&query=%s' % (sys.argv[0], urlencode({'keyword': keyword}))
-        xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, True)
-
-    def __date(self, itemdate):
+    def _extract_date(self, itemdate):
         # 現在時刻
         now = datetime.datetime.now()
         year0 = now.strftime('%Y')
@@ -331,21 +282,21 @@ class Browse:
         # 抽出結果
         return date
 
-    def __labeldate(self, date):
+    def _convert_date(self, date):
         # listitem.date用に変換
         m = re.search('^([0-9]{4})-([0-9]{2})-([0-9]{2})', date)
         if m:
             date = '%s.%s.%s' % (m.group(3), m.group(2), m.group(1))
         return date
 
-    def __thumbnail(self, id):
+    def _create_thumbnail(self, id):
         # ファイルパス
-        imagefile = os.path.join(Const.CACHE_PATH, f'{id}.jpg')
+        imagefile = os.path.join(self.IMG_CACHE, f'{id}.jpg')
         if os.path.isfile(imagefile) and os.path.getsize(imagefile) < 1000:
             # delete imagefile
             os.remove(imagefile)
             # delete from database
-            conn = sqlite.connect(Const.CACHE_DB)
+            conn = sqlite.connect(self.CACHE_DB)
             c = conn.cursor()
             # c.execute("SELECT cachedurl FROM texture WHERE url = '%s';" % imagefile)
             c.execute(f"DELETE FROM texture WHERE url = '{imagefile}';")
@@ -355,7 +306,7 @@ class Browse:
             pass
         else:
             url = f'https://statics.tver.jp/images/content/thumbnail/episode/small/{id}.jpg'
-            buffer = urlread(url)
+            buffer = self.request(url, decode=False)
             image = Image.open(io.BytesIO(buffer))  # 320x180
             image = image.resize((216, 122))
             background = Image.new('RGB', (216, 216), (0, 0, 0))

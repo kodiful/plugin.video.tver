@@ -1,44 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import json
 import xbmc
 import xbmcaddon
 
-from resources.lib.common import *
+from resources.lib.common import Common
 from resources.lib.browse import Browse
+from resources.lib.cache import Cache
 from resources.lib.smartlist import SmartList
+
 
 # HTTP接続におけるタイムアウト(秒)
 import socket
 socket.setdefaulttimeout(60)
-
-
-class Cache():
-
-    def __init__(self):
-        self.files = os.listdir(Const.CACHE_PATH)
-
-    def clear(self):
-        for file in self.files:
-            try:
-                os.remove(os.path.join(Const.CACHE_PATH, file))
-            except Exception:
-                pass
-
-    def update(self):
-        size = 0
-        for file in self.files:
-            try:
-                size = size + os.path.getsize(os.path.join(Const.CACHE_PATH, file))
-            except Exception:
-                pass
-        if size > 1024 * 1024:
-            Const.SET('cache', '%.1f MB / %d files' % (size / 1024 / 1024, len(self.files)))
-        elif size > 1024:
-            Const.SET('cache', '%.1f kB / %d files' % (size / 1024, len(self.files)))
-        else:
-            Const.SET('cache', '%d bytes / %d files' % (size, len(self.files)))
 
 
 if __name__ == '__main__':
@@ -49,12 +23,12 @@ if __name__ == '__main__':
     query = args.get('query', '')
 
     # キャッシュサイズが未設定の場合は設定
-    if Const.GET('cache') == '':
+    if Common.GET('cache') == '':
         Cache().update()
 
     # スマートリスト設定をクリア
-    keyword = Const.GET('keyword')
-    Const.SET('keyword', '')
+    keyword = Common.GET('keyword')
+    Common.SET('keyword', '')
 
     # top
     if action == '':
@@ -75,10 +49,6 @@ if __name__ == '__main__':
     # search
     elif action == 'search':
         Browse(query).search()
-
-    # play
-    elif action == 'play':
-        Browse().play(args['url'])
 
     # download
     elif action == 'download':

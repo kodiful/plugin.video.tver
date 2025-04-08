@@ -56,7 +56,7 @@ class LocalProxyHandler(SimpleHTTPRequestHandler, Common):
             # パスに応じて処理
             if request.path == '/':
                 self.send_response(200)
-                self.send_header('Content-Type', 'text/plain')
+                self.send_header('Content-Type', 'text/html')
                 self.end_headers()
             elif request.path == '/play' or request.path == '/download':
                 self.send_response(302)
@@ -73,9 +73,9 @@ class LocalProxyHandler(SimpleHTTPRequestHandler, Common):
                 self.send_response(404)
                 self.end_headers()
         except Exception as e:
-            self.log(e)
             self.send_response(500)
             self.end_headers()
+            self.log(e)
 
     def do_GET(self):
         try:
@@ -84,29 +84,33 @@ class LocalProxyHandler(SimpleHTTPRequestHandler, Common):
             # パスに応じて処理
             if request.path == '/':
                 self.send_response(200)
-                self.send_header('Content-Type', 'text/plain')
+                self.send_header('Content-Type', 'text/html')
                 self.end_headers()
-                message = '%s\n' % '|'.join(['dir', 'id', 'thread.ident', 'thread.is_alive', 'ffmpeg.pid', 'ffmpeg.returncode'])
-                self.wfile.write(message.encode())
-                for dir, item in self.server.threadlist.items():
-                    thread = item.get('thread')
-                    mux = item.get('mux')
-                    id = item.get('id')
-                    message = '%s\n' % '|'.join([dir, id, str(thread.ident), str(thread.is_alive()), str(mux.process.pid), str(mux.process.returncode)])
-                    self.wfile.write(message.encode())
+                html = self.threadlist2html()
+                self.wfile.write(html.encode())
+            elif request.path.endswith('.css'):
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/css')
+                self.end_headers()
+                # cssファイルの内容を返す
+                paths = request.path.split('/')
+                with open(os.path.join(self.DATA_PATH, paths[-2], paths[-1]), 'rb') as f:
+                    self.wfile.write(f.read())
             elif request.path == '/play' or request.path == '/download':
                 id = request.query
                 # 処理スレッドでオーディオ/ビデオストリームを統合
                 mux = Mux(id)
                 thread = threading.Thread(target=mux.execute, daemon=True)
                 # スレッドリストに格納
-                self.server.threadlist[mux.dir] = {'thread': thread, 'mux': mux, 'id': id}
+                self.server.threadlist[mux.dir] = threaddata = {'thread': thread, 'mux': mux, 'id': id, 'status': ''}
                 # 処理スレッド起動
                 thread.start()
                 # 監視スレッド起動（再生時のみ/ダウンロード時は監視しない）
                 if request.path == '/play':
-                    watchdog = Watchdog(thread, mux, id)
+                    watchdog = Watchdog(thread, mux, id, threaddata)
                     threading.Thread(target=watchdog.execute, daemon=True).start()
+                if request.path == '/download':
+                    threaddata['status'] = 'background'
                 # HLS_FILEが生成されるまで待つ
                 while mux.process is None or mux.process.returncode is None:
                     if os.path.exists(mux.m3u8_file):
@@ -118,60 +122,98 @@ class LocalProxyHandler(SimpleHTTPRequestHandler, Common):
                 self.end_headers()
                 self.wfile.write(b'302 Found')
             elif request.path.endswith('.m3u8'):
-                # m3u8ファイルの内容を返す
-                paths = request.path.split('/')
                 try:
                     self.send_response(200)
                     self.send_header('Content-Type', 'application/x-mpegurl')
                     self.end_headers()
+                    # m3u8ファイルの内容を返す
+                    paths = request.path.split('/')
                     with open(os.path.join(self.HLS_CACHE, paths[-2], paths[-1]), 'rb') as f:
                         self.wfile.write(f.read())
                 except (BrokenPipeError, ConnectionResetError):
                     pass
             elif request.path.endswith('.ts'):
-                self.send_response(200)
-                self.send_header('Content-Type', 'video/mp2t')
-                self.end_headers()
-                # tsファイルの内容を返す
-                paths = request.path.split('/')
-                with open(os.path.join(self.HLS_CACHE, paths[-2], paths[-1]), 'rb') as f:
-                    self.wfile.write(f.read())
+                try:
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'video/mp2t')
+                    self.end_headers()
+                    # tsファイルの内容を返す
+                    paths = request.path.split('/')
+                    with open(os.path.join(self.HLS_CACHE, paths[-2], paths[-1]), 'rb') as f:
+                        self.wfile.write(f.read())
+                except (BrokenPipeError, ConnectionResetError):
+                    pass
             else:
                 self.send_response(404)
                 self.end_headers()
                 self.wfile.write(b'404 Not Found')
         except Exception as e:
-            self.log(e)
             self.send_response(500)
             self.end_headers()
             self.wfile.write(b'500 Internal Server Error')
+            self.log(e)
+
+    def threadlist2html(self):
+        # リスト化
+        data = [['dir', 'id', 'thread.ident', 'thread.is_alive', 'ffmpeg.pid', 'ffmpeg.returncode', 'status']]
+        for dir, item in self.server.threadlist.items():
+            thread = item.get('thread')
+            mux = item.get('mux')
+            id = item.get('id')
+            status = item.get('status')
+            data.append([dir, id, thread.ident, thread.is_alive(), mux.process.pid, mux.process.returncode, status])
+        # hrmlに変換
+        html = ['<table>']
+        html.append('<thead>')
+        for row in data[:1]:
+            html.append('<tr>')
+            html.extend([f'<th>{cell}</th>' for cell in row])
+            html.append('</tr>')
+        html.append('</thead>')
+        html.append('<tbody>')
+        for row in data[1:]:
+            html.append('<tr>')
+            html.extend([f'<td>{cell}</td>' for cell in row])
+            html.append('</tr>')
+        html.append('</tbody>')
+        html.append('</table>')
+        # ページに埋め込む
+        with open(os.path.join(self.DATA_PATH, 'html', 'template.html')) as f:
+            template = f.read()
+        return template.format(table='\n'.join(html))
 
 
 class Watchdog(Common):
 
-    def __init__(self, thread, mux, id):
+    def __init__(self, thread, mux, id, threaddata):
         self.thread = thread
         self.mux = mux
         self.id = id
+        self.threaddata = threaddata
     
     def execute(self):
         while self.thread.is_alive():
-            if self.mux.process is not None:
+            if self.mux.process is None:  # 処理開始前
+                pass
+            elif self.mux.process.returncode is None:  # 処理中
                 if xbmc.Player().isPlaying():
                     item = xbmc.Player().getPlayingItem()
-                    # item.getPath(): "http://127.0.0.1:8089/?epmi3rnbm0"
-                    if item.getPath().find(self.id) < 0:
+                    if item.getPath().find(self.id) == -1:
                         # スレッドと違うコンテンツが再生されているのでffmpegのプロセスを停止
                         self.log('competitive player:', item.getPath())
                         self.mux.process.terminate()
                         self.mux.process.wait()
                         self.log('MUX terminated:', self.id)
+                        self.threaddata['status'] = 'competitive player'
                 else:
                     # 再生されているコンテンツがないのでffmpegのプロセスを停止
                     self.log('no player')
                     self.mux.process.terminate()
                     self.mux.process.wait()
                     self.log('MUX terminated:', self.id)
+                    self.threaddata['status'] = 'no player'
+            else:  # 処理終了
+                break
             # 待機
             xbmc.sleep(1000)
 

@@ -52,10 +52,6 @@ class Common:
     CATEGORIZE = os.path.join(DATA_PATH, 'icons', 'tag.png')
     BROWSE_FOLDER = os.path.join(DATA_PATH, 'icons', 'folder.png')
 
-    # HLS
-    HLS_FILE = 'hls.m3u8'
-    HLS_TIME = 5
-
     # 通知
     @staticmethod
     def notify(*messages, **options):
@@ -114,6 +110,6 @@ class Common:
                 if content_type.startswith('text/'):
                     content = content.decode()
         except HTTPError as e:
-            Common.log(e)
             content = None
+            Common.log(e)
         return content

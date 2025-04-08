@@ -88,37 +88,45 @@ class LocalProxyHandler(SimpleHTTPRequestHandler, Common):
                 self.end_headers()
                 html = self.threadlist2html()
                 self.wfile.write(html.encode())
-            elif request.path.endswith('.css'):
-                self.send_response(200)
-                self.send_header('Content-Type', 'text/css')
-                self.end_headers()
-                # cssファイルの内容を返す
-                paths = request.path.split('/')
-                with open(os.path.join(self.DATA_PATH, paths[-2], paths[-1]), 'rb') as f:
-                    self.wfile.write(f.read())
             elif request.path == '/play' or request.path == '/download':
                 id = request.query
+                # 前処理
+                if request.path == '/play':  # 再生時
+                    dirname = '0'
+                    status = ''
+                    # 既存のスレッドがあれば停止
+                    item = self.server.threadlist.get(dirname)
+                    if item and item['thread'].is_alive():
+                        self.log('new player:', item['id'])
+                        item['mux'].process.terminate()
+                        item['mux'].process.wait()
+                        self.log('MUX terminated:', item['id'])
+                        item['status'] = 'new player'
+                if request.path == '/download':  # ダウンロード時
+                    dirname = f'{datetime.datetime.now().timestamp():.0f}'
+                    status = 'background'
+                # マルチプレクサ
+                mux = Mux(dirname, id)
                 # 処理スレッドでオーディオ/ビデオストリームを統合
-                mux = Mux(id)
                 thread = threading.Thread(target=mux.execute, daemon=True)
+                # スレッドデータ
+                threaddata = {'thread': thread, 'mux': mux, 'dirname': dirname, 'id': id, 'status': status}
                 # スレッドリストに格納
-                self.server.threadlist[mux.dir] = threaddata = {'thread': thread, 'mux': mux, 'id': id, 'status': ''}
+                self.server.threadlist[dirname] = threaddata
                 # 処理スレッド起動
                 thread.start()
-                # 監視スレッド起動（再生時のみ/ダウンロード時は監視しない）
-                if request.path == '/play':
+                # 後処理
+                if request.path == '/play':  # 再生時
                     watchdog = Watchdog(thread, mux, id, threaddata)
-                    threading.Thread(target=watchdog.execute, daemon=True).start()
-                if request.path == '/download':
-                    threaddata['status'] = 'background'
-                # HLS_FILEが生成されるまで待つ
+                    threading.Thread(target=watchdog.execute, daemon=True).start()  # 監視スレッド起動
+                # m3u8_fileが生成されるまで待つ
                 while mux.process is None or mux.process.returncode is None:
                     if os.path.exists(mux.m3u8_file):
                         break
                     xbmc.sleep(1000)
-                # HLS_FILEへリダイレクト
+                # m3u8_fileへリダイレクト
                 self.send_response(302)
-                self.send_header('Location', f'http://127.0.0.1:{self.server.port}/{mux.dir}/{self.HLS_FILE}')
+                self.send_header('Location', f'http://127.0.0.1:{self.server.port}/{mux.dirname}/{mux.filename}')
                 self.end_headers()
                 self.wfile.write(b'302 Found')
             elif request.path.endswith('.m3u8'):
@@ -155,13 +163,13 @@ class LocalProxyHandler(SimpleHTTPRequestHandler, Common):
 
     def threadlist2html(self):
         # リスト化
-        data = [['dir', 'id', 'thread.ident', 'thread.is_alive', 'ffmpeg.pid', 'ffmpeg.returncode', 'status']]
-        for dir, item in self.server.threadlist.items():
+        data = [['dirname', 'id', 'thread.ident', 'thread.is_alive', 'resolution', 'ffmpeg.pid', 'ffmpeg.returncode', 'status']]
+        for dirname, item in self.server.threadlist.items():
             thread = item.get('thread')
             mux = item.get('mux')
             id = item.get('id')
             status = item.get('status')
-            data.append([dir, id, thread.ident, thread.is_alive(), mux.process.pid, mux.process.returncode, status])
+            data.append([dirname, id, thread.ident, thread.is_alive(), mux.resolution, mux.process.pid, mux.process.returncode, status])
         # hrmlに変換
         html = ['<table>']
         html.append('<thead>')
@@ -220,20 +228,24 @@ class Watchdog(Common):
 
 class Mux(Common):
 
-    def __init__(self, id):
-        self.id = id
-        self.dir = f'{datetime.datetime.now().timestamp():.0f}.{id}'
+    def __init__(self, dirname, id):
+        # オーディオ/ビデオのストリームのURLを取得
         streams = self.get_streams(id)
-        resolution = self.GET('resolution')
-        self.audio_stream = streams[resolution]['audio']
-        self.video_stream = streams[resolution]['video']
-        dir_path = os.path.join(self.HLS_CACHE, self.dir)
-        self.m3u8_file = os.path.join(dir_path, self.HLS_FILE)
+        self.resolution = self.GET('resolution')  # 解像度：640x360|960x540|1280x720|1920x1080
+        self.audio_stream = streams[self.resolution]['audio']
+        self.video_stream = streams[self.resolution]['video']
+        # ffmpegの出力を格納するディレクトリ/ファイル
+        self.id = id
+        self.dirname = dirname
+        self.filename = f'{id}.m3u8'
+        dirpath = os.path.join(self.HLS_CACHE, self.dirname)
+        self.m3u8_file = os.path.join(dirpath, self.filename)
+        # 既存のディレクトリは削除して新規作成
+        if os.path.exists(dirpath):
+            shutil.rmtree(dirpath)
+        os.makedirs(dirpath)
+        # ffmpegのプロセス
         self.process = None
-        # ディレクトリを新規作成
-        if os.path.exists(dir_path):
-            shutil.rmtree(dir_path)
-        os.makedirs(dir_path)
 
     def execute(self):
         self.log('start mux:', self.id)
@@ -256,9 +268,9 @@ class Mux(Common):
         self.process.wait()
         # 処理結果に応じて後処理
         if self.process.returncode == 0:
-            self.log('MUX complete:', self.id)
+            self.log('MUX complete:', self.dirname, self.id)
         else:
-            self.log('MUX error (possibly due to interruption):', self.id)
+            self.log('MUX error (possibly due to interruption):', self.dirname, self.id)
 
     def get_streams(self, id):
         # エピソードJSONをダウンロード

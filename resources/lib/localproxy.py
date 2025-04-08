@@ -200,11 +200,11 @@ class Watchdog(Common):
                     item = xbmc.Player().getPlayingItem()
                     if item.getPath().find(self.id) == -1:
                         # スレッドと違うコンテンツが再生されているのでffmpegのプロセスを停止
-                        self.log('competitive player:', item.getPath())
+                        self.log('new player:', item.getPath())
                         self.mux.process.terminate()
                         self.mux.process.wait()
                         self.log('MUX terminated:', self.id)
-                        self.threaddata['status'] = 'competitive player'
+                        self.threaddata['status'] = 'new player'
                 else:
                     # 再生されているコンテンツがないのでffmpegのプロセスを停止
                     self.log('no player')

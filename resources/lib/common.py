@@ -82,20 +82,19 @@ class Common:
         # ログレベル、メッセージを設定
         if isinstance(messages[0], Exception):
             level = xbmc.LOGERROR
-            message = '\n'.join([
-                ''.join(list(traceback.TracebackException.from_exception(messages[0]).format())),
-                ' '.join(map(lambda x: str(x), messages[1:]))
-            ])
+            message = '\n'.join(list(map(lambda x: x.strip(), traceback.TracebackException.from_exception(messages[0]).format())))
+            if len(messages[1:]) > 0:
+                message += ': ' + ' '.join(map(lambda x: str(x), messages[1:]))
         else:
             level = xbmc.LOGINFO
             frame = inspect.currentframe().f_back
             filename = os.path.basename(frame.f_code.co_filename)
             lineno = frame.f_lineno
             name = frame.f_code.co_name
-            message = ': '.join([
-                addon.getAddonInfo('id'),
-                f'{filename}({lineno}) {name}',
-                ' '.join(map(lambda x: str(x), messages))])
+            id = addon.getAddonInfo('id')
+            message = f'Addon "{id}", File "{filename}", line {lineno}, in {name}'
+            if len(messages) > 0:
+                message += ': ' + ' '.join(map(lambda x: str(x), messages))
         # ログ出力
         xbmc.log(message, level)
 

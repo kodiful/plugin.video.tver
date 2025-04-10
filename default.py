@@ -22,13 +22,15 @@ if __name__ == '__main__':
     action = args.get('action', '')
     query = args.get('query', '')
 
-    # キャッシュサイズが未設定の場合は設定
-    if Common.GET('cache') == '':
-        Cache().update()
+    # キャッシュサイズを更新
+    Cache().update()
 
     # スマートリスト設定をクリア
     keyword = Common.GET('keyword')
     Common.SET('keyword', '')
+
+    # アドオン設定（表示設定）をクリア
+    Common.SET('showall', 'true')
 
     # top
     if action == '':
@@ -49,6 +51,10 @@ if __name__ == '__main__':
     # search
     elif action == 'search':
         Browse(query).search()
+
+    # play
+    elif action == 'play':
+        Browse().play(args['contentid'])
 
     # download
     elif action == 'download':
@@ -72,8 +78,8 @@ if __name__ == '__main__':
         edit = args.get('edit')
         SmartList().beginEdit(keyword, edit)
         # open settings & focus smartlist category
+        Common.SET('showall', 'false')
         xbmc.executebuiltin('Addon.OpenSettings(%s)' % xbmcaddon.Addon().getAddonInfo('id'))
-        xbmc.executebuiltin('SetFocus(-99)')
 
     elif action == 'endEditSmartList':
         SmartList().endEdit(keyword)

@@ -149,9 +149,15 @@ class Browse(Common):
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
+    def play(self, id):
+        url = self._get_manifest(id)
+        listitem = xbmcgui.ListItem()
+        listitem.setPath(url)
+        listitem.setMimeType('application/x-mpegurl')
+        xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
+
     def download(self, url, id):
-        port = self.GET('port')
-        url = f'http://127.0.0.1:{port}/download?{id}'
+        url = self._get_manifest(id)
         self.downloader.download(url, id)
 
     def add_directory_item(self, name, query, action, iconimage=''):
@@ -184,19 +190,20 @@ class Browse(Common):
     def add_item(self, item):
         '''
         {
-            "id": "epwyjk82m8",
-            "version": 12,
-            "title": "　",
+            "id": "ep7ywezxdh",
+            "version": 11,
+            "title": "若林正恭＆井ノ原快彦＆ヒコロヒー＆弘中綾香アナ",
             "seriesID": "srrao7paa6",
-            "endAt": 1698076920,
-            "broadcastDateLabel": "10月16日(月)放送分",
+            "endAt": 1744646580,
+            "broadcastDateLabel": "4月7日(月)放送分",
             "isNHKContent": false,
             "isSubtitle": false,
             "ribbonID": 0,
             "seriesTitle": "激レアさんを連れてきた。",
             "isAvailable": true,
             "broadcasterName": "テレビ朝日",
-            "productionProviderName": "テレビ朝日"
+            "productionProviderName": "テレビ朝日",
+            "isEndingSoon": false
         }
         '''
         # ID
@@ -259,7 +266,13 @@ class Browse(Common):
         listitem.addContextMenuItems(contextmenu, replaceItems=True)
         # add directory item
         port = self.GET('port')
-        xbmcplugin.addDirectoryItem(int(sys.argv[1]), f'http://127.0.0.1:{port}/play?{id}', listitem, False)
+        #xbmcplugin.addDirectoryItem(int(sys.argv[1]), f'http://127.0.0.1:{port}/play?{id}', listitem, False)
+        url = '%s?action=play&contentid=%s' % (sys.argv[0], id)
+        #url = 'https://variants.streaks.jp/v5/tver-ex/f696c9a8084f4b80babc41d3a48de58a/d1e6a4622fb8425389103d6716e4ebd4/video/c9185baa-11d3-11f0-8e83-06bc9d11be6d/video_1743826427.m3u8?vt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlZGdlIjoiZXgtdm9kLXMtY2RuLnR2ZXIuanAifQ.HgyFGrmqoMXfjaKdOS1_qNBXJz49YMhnAyQds8LJuWI'
+        #url = 'http://127.0.0.1:8089/0/video.m3u8'
+        #url = 'http://127.0.0.1:8089/0/manifest.m3u8'
+        #url = '/Users/uchiyama/Library/Application Support/Kodi_21_2/addons/plugin.video.tver/addon_data/cache/hls/0/manifest.m3u8'
+        xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, False)
 
     def _extract_date(self, itemdate):
         # 現在時刻
@@ -291,18 +304,17 @@ class Browse(Common):
 
     def _create_thumbnail(self, id):
         # ファイルパス
-        imagefile = os.path.join(self.IMG_CACHE, f'{id}.jpg')
-        if os.path.isfile(imagefile) and os.path.getsize(imagefile) < 1000:
-            # delete imagefile
-            os.remove(imagefile)
+        img_file = os.path.join(self.CACHE_PATH, f'{id}.jpg')
+        if os.path.isfile(img_file) and os.path.getsize(img_file) < 1000:
+            # delete img_file
+            os.remove(img_file)
             # delete from database
             conn = sqlite.connect(self.CACHE_DB)
-            c = conn.cursor()
-            # c.execute("SELECT cachedurl FROM texture WHERE url = '%s';" % imagefile)
-            c.execute(f"DELETE FROM texture WHERE url = '{imagefile}';")
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM texture WHERE url = :img_file', {'img_file': img_file})
             conn.commit()
             conn.close()
-        if os.path.isfile(imagefile):
+        if os.path.isfile(img_file):
             pass
         else:
             url = f'https://statics.tver.jp/images/content/thumbnail/episode/small/{id}.jpg'
@@ -311,5 +323,164 @@ class Browse(Common):
             image = image.resize((216, 122))
             background = Image.new('RGB', (216, 216), (0, 0, 0))
             background.paste(image, (0, 47))
-            background.save(imagefile, 'PNG')
-        return imagefile
+            background.save(img_file, 'PNG')
+        return img_file
+
+    def _get_manifest(self, id):
+        # エピソードJSONをダウンロード
+        # https://statics.tver.jp/content/episode/epmi3rnbm0.json
+        url = f'https://statics.tver.jp/content/episode/{id}.json'
+        buf = self.request(url)
+        '''
+        {
+            "id": "epmi3rnbm0",
+            "version": 15,
+            "video": {
+                "videoRefID": "1589_1588_55861",
+                "accountID": "4394098883001",
+                "playerID": "MfxS5MXtZ",
+                "channelID": "ex"
+            },
+            "title": "お酒飲めないけど飲み会大好き芸人",
+            "seriesID": "sr542nxzof",
+            "seasonID": "sso0k36qo8",
+            "description": "▽出川持ち込み企画▽酒ナシでも朝まで楽しめる▽ホリケン＆森田＆中岡＆芝▽ソフトドリンクに合う！お店メニュー紹介▽居酒屋での振る舞い方▽スタジオでシラフで乾杯",
+            "no": 937,
+            "broadcastProviderLabel": "テレビ朝日",
+            "productionProviderLabel": "テレビ朝日",
+            "broadcastDateLabel": "4月3日(木)放送分",
+            "broadcastProviderID": "ex",
+            "isSubtitle": false,
+            "copyright": "(C)テレビ朝日",
+            "viewStatus": {
+                "startAt": 1743697980,
+                "endAt": 1744302780
+            },
+            "isAllowCast": true,
+            "share": {
+                "text": "アメトーーク！\n#TVer",
+                "url": "https://tver.jp/episodes/epmi3rnbm0"
+            },
+            "tags": {},
+            "isNHKContent": false,
+            "svod": [],
+            "streaks": {
+                "videoRefID": "1589_1588_55861",
+                "mediaID": "ab1cca1967384cbf9a559c7f9fe23002",
+                "projectID": "tver-ex"
+            }
+        }
+        '''
+        episode = json.loads(buf)
+        streaks = episode.get('streaks')
+        projectID = streaks.get('projectID')
+        videoRefID = streaks.get('videoRefID')
+        # プレイバックJSONを取得
+        # https://playback.api.streaks.jp/v1/projects/tver-ex/medias/ref:1589_1588_55861
+        url = f'https://playback.api.streaks.jp/v1/projects/{projectID}/medias/ref:{videoRefID}'
+        buf = self.request(url, {'origin': 'https://tver.jp', 'referer': 'https://tver.jp'})
+        '''
+        {
+            "project_id": "tver-ex",
+            "id": "ab1cca1967384cbf9a559c7f9fe23002",
+            "ref_id": "1589_1588_55861",
+            "type": "file",
+            "name": "アメトーーク！ アメトーーク！ 4月3日(木)放送分 お酒飲めないけど飲み会大好き芸人",
+            "description": "▽出川持ち込み企画▽酒ナシでも朝まで楽しめる▽ホリケン＆森田＆中岡＆芝▽ソフトドリンクに合う！お店メニュー紹介▽居酒屋での振る舞い方▽スタジオでシラフで乾杯",
+            "duration": 2796.843,
+            "profile": "51ef4bc9763a43afb10a20267ca1e3c0",
+            "poster": {
+                "src": "https://vod-tver-ex.streaks.jp/uploads/media/poster_image/ab1cca1967384cbf9a559c7f9fe23002/298d7208-cca8-414f-bff9-58299fc59569.jpg"
+            },
+            "thumbnail": {
+                "src": "https://vod-tver-ex.streaks.jp/uploads/media/thumbnail_image/ab1cca1967384cbf9a559c7f9fe23002/a46dcdd6-2169-470d-a230-8aea5d6107e3.jpg"
+            },
+            "sources": [
+                {
+                "id": "d35c34ea7eeb45949ce9944a4d094b74",
+                "label": "hls_aes128",
+                "type": "application/x-mpegURL",
+                "resolution": "1920x1080",
+                "ext_x_version": 3,
+                "src": "https://manifest.streaks.jp/v6/tver-ex/ab1cca1967384cbf9a559c7f9fe23002/d35c34ea7eeb45949ce9944a4d094b74/hls/v3/manifest.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYyI6ImI3MDE3ODUyMjk5ODQ4M2Q5NDczMGQwNDFiNjgxMzRmIiwiZWRnZSI6IjZiNzk5ZjAyMDk0YzQxNWNhMzQzNGE2ZmIzOWFlMWVjIiwiY29kZWNzIjoiYXV0byIsImV4cCI6MTc0NDAwMjAwMCwidnA5IjoxLCJzbSI6IjI4ZTUyMmM0YWUzMDQyMzg5MzBiMmJjNjZlMDRhM2I4IiwicHB3IjoiNDc2In0.RQAoLnzksUAec5UzmnJR7z6epor9ZAG2Qjk77fqFA5o",
+                "cdn": "jocdn"
+                }
+            ],
+            "tracks": [
+                {
+                "id": "d2c8c4e476124498b43b8b6cb10db26e",
+                "kind": "thumbnails",
+                "label": "thumbnail_tile0",
+                "m3u8_embeded": false,
+                "src": "https://tracks.streaks.jp/tver-ex/ab1cca1967384cbf9a559c7f9fe23002/track/d2c8c4e476124498b43b8b6cb10db26e/thumbnails.vtt?ts=1743656894",
+                "type": "text/vtt"
+                }
+            ],
+            "cue_points": [
+                {
+                "name": "自動検出",
+                "start_time": 2596.49,
+                "end_time": null,
+                "type": "ad"
+                },
+                {
+                "name": "自動検出",
+                "start_time": 2133.83,
+                "end_time": null,
+                "type": "ad"
+                },
+                {
+                "name": "自動検出",
+                "start_time": 1725.56,
+                "end_time": null,
+                "type": "ad"
+                },
+                {
+                "name": "自動検出",
+                "start_time": 1099.43,
+                "end_time": null,
+                "type": "ad"
+                },
+                {
+                "name": "自動検出",
+                "start_time": 609.509,
+                "end_time": null,
+                "type": "ad"
+                }
+            ],
+            "chapters": [],
+            "ads": [
+                {
+                "type": "vmap",
+                "src": "https://vmap.v.ad-generation.jp/v1_0/13/5/[ads_params.guid]?ad_unit_id=tver_[ads_params.device_type]&label_site=tver&label_device=[ads_params.device_type]&label_streaming_type=vod&label_source=dio_product&rnd=[ads_params.random_32]&tp=[session.referer]&is_lat=[ads_params.is_lat]&label_is_lat=[ads_params.is_lat]&xuid_[ads_params.idtype]=[ads_params.rdid]&label_cu_uuid=[ads_params.rdid]&label_ppid=[ads_params.platformAdUid]&label_vr_uid=[ads_params.vr_uuid]&label_vr_pf=1028&label_vrtag_type=[ads_params.tag_type]&label_givn=[GOOGLE_INSTREAM_VIDEO_NONCE]&label_tvcu_g=[ads_params.tvcu_gender]&label_tvcu_age=[ads_params.tvcu_age]&label_tvcu_agegrp=[ads_params.tvcu_agegrp]&label_tvcu_zcode=[ads_params.tvcu_zcode]&label_tvcu_pcode=[ads_params.tvcu_pcode]&label_tvcu_ccode=[ads_params.tvcu_ccode]&label_tvcu_interest=[ads_params.interest]&label_tvcu_aud=[ads_params.audience]&label_tvcu_params=[ads_params.tvcu_params]&label_personal_is_lat=[ads_params.personalIsLat]&label_platform_uid=[ads_params.platformAdUid]&label_member_id=[ads_params.memberId]&label_vpmute=0&label_vr_uid2=[ads_params.platformVrUid]&label_gnr=[ads_params.program_category]&label_sub_gnr=[ads_params.sub_genre]&label_car=[ads_params.car]&label_ovp=play",
+                "time_offset": null
+                }
+            ],
+            "ad_fields": {
+                "guid": "6370673690112",
+                "advmapurl": "https://vmap.v.ad-generation.jp/v1_0/13/5/6370673690112?ad_unit_id=tver_{device}&label_site=tver&label_device={device}&label_streaming_type=vod&label_source=dio_product&rnd={random}&tp=[referrer_url]&is_lat={is_lat}&label_is_lat={is_lat}&xuid_{idtype}={uuid}&label_cu_uuid={uuid}&label_ppid={iuid}&label_vr_uid={vr_uid}&label_vr_pf=1028&label_vrtag_type={vrtag_type}&label_givn=[GOOGLE_INSTREAM_VIDEO_NONCE]&label_tvcu_g={gender}&label_tvcu_age={age}&label_tvcu_agegrp={agegrp}&label_tvcu_zcode={zcode}&label_tvcu_pcode={pcode}&label_tvcu_ccode={ccode}&label_tvcu_interest={interest}&label_tvcu_aud={audience}&label_tvcu_params={tvcu_params}&label_personal_is_lat={personalIsLat}&label_platform_uid={platformAdUid}&label_member_id={memberId}&label_vpmute=false&label_vr_uid2={vr_uid2}&label_gnr=variety&label_sub_gnr=",
+                "sub_genre": "",
+                "program_category": "variety"
+            },
+            "tags": [],
+            "offline_enabled": true,
+            "resolution": "1920x1080",
+            "created_at": "2025-03-28T17:36:42.579+0900",
+            "updated_at": "2025-04-04T13:21:27.409+0900",
+            "copyright": "",
+            "metrics": {
+                "host": "tver-metrics.streaks.jp/v2",
+                "sessionExpire": 1800000,
+                "session_expire": 1800000,
+                "pingTime": 20,
+                "ping_time": 20,
+                "sessionMaxAge": 86400,
+                "session_max_age": 86400
+            }
+        }
+        '''
+        playback = json.loads(buf)
+        sources = playback.get('sources')
+        src = sources[0].get('src')
+        # https://manifest.streaks.jp/v6/tver-ex/ab1cca1967384cbf9a559c7f9fe23002/d35c34ea7eeb45949ce9944a4d094b74/hls/v3/manifest.m3u8?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYyI6ImI3MDE3ODUyMjk5ODQ4M2Q5NDczMGQwNDFiNjgxMzRmIiwiZWRnZSI6IjZiNzk5ZjAyMDk0YzQxNWNhMzQzNGE2ZmIzOWFlMWVjIiwiY29kZWNzIjoiYXV0byIsImV4cCI6MTc0NDAwMjAwMCwidnA5IjoxLCJzbSI6IjI4ZTUyMmM0YWUzMDQyMzg5MzBiMmJjNjZlMDRhM2I4IiwicHB3IjoiNDc2In0.RQAoLnzksUAec5UzmnJR7z6epor9ZAG2Qjk77fqFA5o
+        return src

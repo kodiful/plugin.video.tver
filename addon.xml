@@ -3,12 +3,10 @@
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
     <import addon="script.module.pil" version="1.1.7" />
-    <import addon="script.module.future" version="1.0.0"/>
   </requires>
   <extension point="xbmc.python.pluginsource" library="default.py">
     <provides>video</provides>
   </extension>
-  <extension point="xbmc.service" library="service.py" />
   <extension point="xbmc.addon.metadata">
     <platform>all</platform>
     <summary lang="en_GB">TVer Client</summary>

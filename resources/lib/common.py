@@ -31,12 +31,6 @@ class Common:
 
     # キャッシュパス
     CACHE_PATH = os.path.join(PROFILE_PATH, 'cache')
-    IMG_CACHE = os.path.join(CACHE_PATH, 'image')
-    if not os.path.isdir(IMG_CACHE):
-        os.makedirs(IMG_CACHE, exist_ok=True)
-    HLS_CACHE = os.path.join(CACHE_PATH, 'hls')
-    if not os.path.isdir(HLS_CACHE):
-        os.makedirs(HLS_CACHE, exist_ok=True)
 
     # ファイルパス
     SMARTLIST_FILE = os.path.join(PROFILE_PATH, 'smatlist.js')
@@ -100,7 +94,7 @@ class Common:
 
     # HTTPリクエスト
     @staticmethod
-    def request(url, headers={}, decode=True):
+    def request(url, headers={}):
         try:
             req = Request(url, headers=headers)
             with urlopen(req) as res:

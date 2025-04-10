@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import os
+import shutil
 import xbmc
 import xbmcaddon
 
@@ -28,9 +30,6 @@ if __name__ == '__main__':
     # スマートリスト設定をクリア
     keyword = Common.GET('keyword')
     Common.SET('keyword', '')
-
-    # アドオン設定（表示設定）をクリア
-    Common.SET('showall', 'true')
 
     # top
     if action == '':
@@ -77,9 +76,11 @@ if __name__ == '__main__':
         keyword = args.get('keyword')
         edit = args.get('edit')
         SmartList().beginEdit(keyword, edit)
-        # open settings & focus smartlist category
-        Common.SET('showall', 'false')
+        # open settings
+        shutil.copy(os.path.join(Common.DATA_PATH, 'settings', 'smartlist.xml'), os.path.join(Common.RESOURCES_PATH, 'settings.xml'))
         xbmc.executebuiltin('Addon.OpenSettings(%s)' % xbmcaddon.Addon().getAddonInfo('id'))
+        xbmc.sleep(1000)
+        shutil.copy(os.path.join(Common.DATA_PATH, 'settings', 'default.xml'), os.path.join(Common.RESOURCES_PATH, 'settings.xml'))
 
     elif action == 'endEditSmartList':
         SmartList().endEdit(keyword)

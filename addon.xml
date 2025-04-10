@@ -8,6 +8,9 @@
     <provides>video</provides>
   </extension>
   <extension point="xbmc.addon.metadata">
+    <assets>
+      <icon>icon.png</icon>
+    </assets>
     <platform>all</platform>
     <summary lang="en_GB">TVer Client</summary>
     <summary lang="ja_JP">TVerクライアント</summary>
@@ -16,5 +19,6 @@
     <disclaimer lang="en_GB">Tested on macOS</disclaimer>
     <disclaimer lang="ja_JP">macOSで動作検証しています</disclaimer>
     <website>http://kodiful.com/</website>
+    <source>https://github.com/kodiful/plugin.video.tver</source>
   </extension>
 </addon>

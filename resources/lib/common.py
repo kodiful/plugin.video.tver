@@ -94,13 +94,12 @@ class Common:
 
     # HTTPリクエスト
     @staticmethod
-    def request(url, headers={}):
+    def request(url, headers={}, decode=True):
         try:
             req = Request(url, headers=headers)
             with urlopen(req) as res:
                 content = res.read()
-                content_type = res.info().get_content_type()
-                if content_type.startswith('text/'):
+                if decode:
                     content = content.decode()
         except HTTPError as e:
             content = None

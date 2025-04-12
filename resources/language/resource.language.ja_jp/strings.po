@@ -40,10 +40,6 @@ msgctxt "#30201"
 msgid "[COLOR lightgreen]Clear Thumbnails Cache[/COLOR]"
 msgstr "[COLOR lightgreen]サムネイルキャッシュをクリア[/COLOR]"
 
-msgctxt "#30205"
-msgid "Debug"
-msgstr "デバッグ"
-
 msgctxt "#30800"
 msgid "All"
 msgstr "[COLOR lightgreen]すべてのジャンル[/COLOR]"

@@ -18,7 +18,7 @@
     <description lang="ja_JP">TVerの動画コンテンツを視聴します</description>
     <disclaimer lang="en_GB">Tested on macOS</disclaimer>
     <disclaimer lang="ja_JP">macOSで動作検証しています</disclaimer>
-    <website>http://kodiful.com/</website>
+    <website>https://kodiful.com/</website>
     <source>https://github.com/kodiful/plugin.video.tver</source>
   </extension>
 </addon>

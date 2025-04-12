@@ -10,7 +10,6 @@
   -->
   <category label="30200">
     <setting label="30201" id="cache" type="action" option="close" action="RunPlugin(plugin://$ID/?action=cache)" default=""/>    
-    <setting label="30205" id="debug" type="bool" default="false"/>
   </category>
   <category label="30000">
     <setting label="30005" id="keyword" type="text"/>

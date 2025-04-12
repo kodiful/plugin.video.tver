@@ -44,29 +44,31 @@ class Common:
     CALENDAR = os.path.join(DATA_PATH, 'icons', 'calendar.png')
     RADIO_TOWER = os.path.join(DATA_PATH, 'icons', 'satellite.png')
     CATEGORIZE = os.path.join(DATA_PATH, 'icons', 'tag.png')
-    BROWSE_FOLDER = os.path.join(DATA_PATH, 'icons', 'folder.png')
+    BROWSE_FOLDER = os.path.join(DATA_PATH, 'icons', 'set.png')
 
     # 通知
     @staticmethod
     def notify(*messages, **options):
         # アドオン
         addon = xbmcaddon.Addon()
-        # ポップアップする時間
-        time = options.get('time', 10000)
-        # ポップアップアイコン
-        image = options.get('image', None)
-        if image:
-            pass
-        elif options.get('error', False):
+        name = addon.getAddonInfo('name')
+        # デフォルト設定
+        if options.get('error'):
             image = 'DefaultIconError.png'
+            level = xbmc.LOGERROR
         else:
             image = 'DefaultIconInfo.png'
+            level = xbmc.LOGINFO
+        # ポップアップする時間
+        duration = options.get('duration', 10000)
+        # ポップアップアイコン
+        image = options.get('image', image)
         # メッセージ
         messages = ' '.join(map(lambda x: str(x), messages))
-        # ログ出力
-        Common.log(messages, error=options.get('error', False))
         # ポップアップ通知
-        xbmc.executebuiltin('Notification("%s","%s",%d,"%s")' % (addon.getAddonInfo('name'), messages, time, image))
+        xbmc.executebuiltin(f'Notification("{name}","{messages}",{duration},"{image}")')
+        # ログ出力
+        Common.log(messages, level=level)
 
     # ログ
     @staticmethod
@@ -75,12 +77,12 @@ class Common:
         addon = xbmcaddon.Addon()
         # ログレベル、メッセージを設定
         if isinstance(messages[0], Exception):
-            level = xbmc.LOGERROR
+            level = options.get('level', xbmc.LOGERROR)
             message = '\n'.join(list(map(lambda x: x.strip(), traceback.TracebackException.from_exception(messages[0]).format())))
             if len(messages[1:]) > 0:
                 message += ': ' + ' '.join(map(lambda x: str(x), messages[1:]))
         else:
-            level = xbmc.LOGINFO
+            level = options.get('level', xbmc.LOGINFO)
             frame = inspect.currentframe().f_back
             filename = os.path.basename(frame.f_code.co_filename)
             lineno = frame.f_lineno

@@ -72,7 +72,7 @@ class Browse(Common):
             else:
                 action = 'search'
             _, query = self.update_query(self.query, {'weekday': id})
-            self.add_directory_item(name, query, action, iconimage=self.CATEGORIZE)
+            self.add_directory_item(name, query, action, iconimage=self.CALENDAR)
         # end of directory
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
@@ -150,9 +150,8 @@ class Browse(Common):
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
     def play(self, id):
-        url = self._get_manifest(id)
-        listitem = xbmcgui.ListItem()
-        listitem.setPath(url)
+        listitem = xbmcgui.ListItem(path=self._get_manifest(id))
+        listitem.setProperty('IsPlayable', 'true')
         listitem.setMimeType('application/x-mpegurl')
         xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
 
@@ -265,13 +264,7 @@ class Browse(Common):
         contextmenu += [(self.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])]  # アドオン設定
         listitem.addContextMenuItems(contextmenu, replaceItems=True)
         # add directory item
-        port = self.GET('port')
-        #xbmcplugin.addDirectoryItem(int(sys.argv[1]), f'http://127.0.0.1:{port}/play?{id}', listitem, False)
         url = '%s?action=play&contentid=%s' % (sys.argv[0], id)
-        #url = 'https://variants.streaks.jp/v5/tver-ex/f696c9a8084f4b80babc41d3a48de58a/d1e6a4622fb8425389103d6716e4ebd4/video/c9185baa-11d3-11f0-8e83-06bc9d11be6d/video_1743826427.m3u8?vt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlZGdlIjoiZXgtdm9kLXMtY2RuLnR2ZXIuanAifQ.HgyFGrmqoMXfjaKdOS1_qNBXJz49YMhnAyQds8LJuWI'
-        #url = 'http://127.0.0.1:8089/0/video.m3u8'
-        #url = 'http://127.0.0.1:8089/0/manifest.m3u8'
-        #url = '/Users/uchiyama/Library/Application Support/Kodi_21_2/addons/plugin.video.tver/addon_data/cache/hls/0/manifest.m3u8'
         xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, False)
 
     def _extract_date(self, itemdate):

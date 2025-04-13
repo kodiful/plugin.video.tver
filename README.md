@@ -21,7 +21,7 @@ macOSで動作検証しています。
 
 起動するとホーム画面が表示されます。
 
-![ホーム画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/b1f86b68-dc81-4b05-b1b0-42bd72380d5e)
+![トップ画面](docs/images/1_トップ.png)
 
 画面の各項目の内容は以下の通りです。
 
@@ -29,19 +29,19 @@ macOSで動作検証しています。
 
 番組を検索します。曜日→チャンネル→ジャンルの順に検索条件を設定します。まず曜日を選択します。
 
-![曜日選択画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/bb65ef04-a74f-4d6e-aa8f-64c4a7db74da)
+![曜日選択画面](docs/images/2_曜日選択.png)
 
 次にチャンネルを選択します。
 
-![チャンネル選択画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/5e04044f-b360-4a75-9a3e-fddd46469262)
+![チャンネル選択画面](docs/images/3_チャンネル選択.png)
 
 次にジャンルを選択します。
 
-![ジャンル選択画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/02fed91c-680b-47cc-86c1-b190f0de759e)
+![ジャンル選択画面](docs/images/4_ジャンル選択.png)
 
 検索結果が表示されます。
 
-![検索結果画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/bd6aa208-346e-4431-96fd-2c84dff6aa76)
+![検索結果画面](docs/images/5_検索結果.png)
 
 ここで見たい番組を選択すると、番組が再生されます（Kodiの設定によっては詳細情報が表示されます）。
 
@@ -62,13 +62,13 @@ macOSで動作検証しています。
 
 ### スマートリストの登録
 
-検索結果画面で、スマートリストに登録したい番組のサブメニューから「スマートリストに追加」を選択してください。
+検索結果画面で、スマートリストに登録したい番組のコンテクストメニューから「スマートリストに追加」を選択してください。
 
-![スマートリストの登録](https://github.com/kodiful/plugin.video.tver/assets/12268536/4026a3b5-3de3-429a-ba67-2897fee7552f)
+![スマートリストの登録](docs/images/6_コンテクストメニュー.png)
 
 選択した番組名をキーワードとするスマートリスト登録画面が開きます。
 
-![スマートリスト登録画面](https://github.com/kodiful/plugin.video.tver/assets/12268536/beabfe57-8bb3-4817-98fc-b888b7dce737)
+![スマートリスト登録画面](docs/images/7_スマートリスト登録.png)
 
 キーワードを適宜編集して「スマートリストを追加」ボタンをクリックしてください。
 スマートリスト登録画面は「アドオン設定」から「スマートリスト」タブを選択して表示することもできます。
@@ -79,7 +79,7 @@ macOSで動作検証しています。
 
 サブメニューから「アドオン設定」を選択してアドオン設定画面を表示します。「設定」タブを選択します。
 
-![アドオン設定画面-設定](https://github.com/kodiful/plugin.video.tver/assets/12268536/b362ec0f-8d1b-4df6-a05e-e58a7b54e4e2)
+![アドオン設定画面-設定](docs/images/8_アドオン設定-設定.png)
 
 画面の各項目の内容は以下の通りです。
 
@@ -97,7 +97,7 @@ macOSで動作検証しています。
 
 サブメニューから「アドオン設定」を選択してアドオン設定画面を表示します。「スマートリスト」タブを選択します。
 
-![アドオン設定画面-スマートリスト](https://github.com/kodiful/plugin.video.tver/assets/12268536/beabfe57-8bb3-4817-98fc-b888b7dce737)
+![アドオン設定画面-スマートリスト](docs/images/9_アドオン設定-スマートリスト)
 
 画面の各項目の内容は以下の通りです。
 

@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
 
+#
+# plugin.video.garapon.tv/resources/lib/downloader.py
+#
+
 import sys
 import os
-import json
+import sqlite3
+from urllib.parse import urlencode
+
 import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
 import xbmcvfs
-
-from urllib.parse import quote_plus
 
 
 class Downloader:
@@ -21,63 +25,58 @@ class Downloader:
             self.remote_id = 'plugin.video.downloader'
             self.remote_addon = xbmcaddon.Addon(self.remote_id)
             self.download_path = self.remote_addon.getSetting('download_path')
-            self.cache_path = os.path.join(xbmcvfs.translatePath(self.remote_addon.getAddonInfo('profile')), 'cache', self.local_id)
-            if not os.path.isdir(self.cache_path):
-                os.makedirs(self.cache_path)
+            self.db_path = os.path.join(xbmcvfs.translatePath(self.remote_addon.getAddonInfo('profile')), 'download.db')
+            self.available = True
         except Exception:
-            self.remote_id = None
-            self.remote_addon = None
-            self.download_path = None
-            self.cache_path = None
+            self.available = False
 
-    def __available(self):
-        return self.remote_addon is not None
-
-    def __exists(self, contentid):
-        filepath = os.path.join(self.download_path, self.local_id, '%s.mp4' % contentid)
-        return os.path.isfile(filepath)
-
-    def __jsonfile(self, contentid):
-        return os.path.join(self.cache_path, '%s.json' % contentid)
-
-    def __save(self, contentid, item):
-        json_file = self.__jsonfile(contentid)
-        if not os.path.isfile(json_file):
-            with open(json_file, 'w', encoding='utf-8') as f:
-                json_data = json.dumps(item, indent=4, ensure_ascii=False, sort_keys=True)
-                f.write(json_data)
-        return json_file
-
+    # トップページに配置するダウンロードアイテム
     def top(self, iconimage=None):
-        if self.__available():
+        if self.available:
             listitem = xbmcgui.ListItem(self.remote_addon.getLocalizedString(30927))
             listitem.setArt({'icon': iconimage})
             listitem.setInfo(type='video', infoLabels={})
             action = 'RunPlugin(plugin://%s?action=settings)' % (self.remote_id)
             contextmenu = [(self.remote_addon.getLocalizedString(30937), action)]
             listitem.addContextMenuItems(contextmenu, replaceItems=True)
-            url = 'plugin://%s?action=list&addonid=%s' % (self.remote_id, self.local_id)
+            url = 'plugin://%s?action=listitems&addonid=%s' % (self.remote_id, self.local_id)
             xbmcplugin.addDirectoryItem(int(sys.argv[1]), url, listitem, True)
 
-    def contextmenu(self, item, url=None):
+    # 検索結果に設定するダウンロードメニュー（コンテクストメニュー）
+    def contextmenu(self, summary, resolved=True):
         contextmenu = []
-        s = item['_summary']
-        contentid = s['contentid']
-        if self.__available():
-            if self.__exists(contentid):
-                action = 'RunPlugin(plugin://%s?action=delete&addonid=%s&contentid=%s)' % (self.remote_id, self.local_id, quote_plus(contentid))
-                contextmenu = [(self.remote_addon.getLocalizedString(30930), action)]
+        if self.available:
+            contentid = summary['contentid']
+            url = summary['url']
+            # サマリ情報をキャッシュする
+            conn = sqlite3.connect(self.db_path, isolation_level=None)
+            cursor = conn.cursor()
+            data = {'addonid': self.local_id}
+            data.update(summary)
+            columns = ', '.join(data.keys())
+            placeholders = ', '.join(['?' for _ in data])
+            sql = f'INSERT OR REPLACE INTO cache ({columns}) VALUES ({placeholders})'
+            cursor.execute(sql, list(data.values()))
+            conn.close()
+            # mp4ファイルの有無を確認する
+            mp4_file = os.path.join(self.download_path, self.local_id, '%s.mp4' % contentid)
+            if os.path.isfile(mp4_file):
+                # mp4ファイルがある場合は削除メニュー
+                args = {'action': 'delete', 'addonid': self.local_id, 'contentid': contentid}
+                contextmenu = [(self.remote_addon.getLocalizedString(30930), 'RunPlugin(plugin://%s?%s)' % (self.remote_id, urlencode(args)))]
             else:
-                json_file = self.__save(contentid, item)
-                if url is None:
-                    action = 'RunPlugin(plugin://%s?action=download&url=%s&contentid=%s)' % (self.local_id, quote_plus(s['url']), quote_plus(contentid))
+                # mp4ファイルがある場合は追加メニュー
+                if resolved:
+                    args = {'action': 'add', 'addonid': self.local_id, 'contentid': contentid, 'url': url}
+                    contextmenu = [(self.remote_addon.getLocalizedString(30929), 'RunPlugin(plugin://%s?%s)' % (self.remote_id, urlencode(args)))]
                 else:
-                    action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id, quote_plus(url), quote_plus(json_file))
-                contextmenu = [(self.remote_addon.getLocalizedString(30929), action)]
-        return contextmenu
+                    # resolveされていない場合はローカル側でaction=downloadを実装 -> resolveされたurlでDownloader().downloadを実行する
+                    args = {'action': 'download', 'contentid': contentid, 'url': url}
+                    contextmenu = [(self.remote_addon.getLocalizedString(30929), 'RunPlugin(plugin://%s?%s)' % (self.local_id, urlencode(args)))]
+        return contextmenu    
 
-    def download(self, url, contentid):
-        if self.__available():
-            json_file = self.__jsonfile(contentid)
-            action = 'RunPlugin(plugin://%s?action=add&addonid=%s&url=%s&json=%s)' % (self.remote_id, self.local_id, quote_plus(url), quote_plus(json_file))
-            xbmc.executebuiltin(action)
+    # ローカルでresolve後に実行するダウンロードメソッド
+    def download(self, contentid, url):
+        if self.available:
+            args = {'action': 'add', 'addonid': self.local_id, 'contentid': contentid, 'url': url}
+            xbmc.executebuiltin('RunPlugin(plugin://%s?%s)' % (self.remote_id, urlencode(args)))

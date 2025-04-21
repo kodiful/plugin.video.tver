@@ -157,7 +157,7 @@ class Browse(Common):
 
     def download(self, url, id):
         url = self._get_manifest(id)
-        self.downloader.download(url, id)
+        self.downloader.download(id, url)
 
     def add_directory_item(self, name, query, action, iconimage=''):
         # listitem
@@ -228,10 +228,10 @@ class Browse(Common):
         # 放送局
         broadcasterName = item.get('broadcasterName')
         # サムネイル
-        #thumbnail = f'https://statics.tver.jp/images/content/thumbnail/episode/small/{id}.jpg'
-        thumbnail = self._create_thumbnail(id)
+        thumbnail = f'https://statics.tver.jp/images/content/thumbnail/episode/small/{id}.jpg'
+        thumbfile = self._create_thumbnail(id)
         # 番組情報
-        pg = item['_summary'] = {
+        summary = {
             'title': title,
             'url': f'https://statics.tver.jp/content/episode/{id}.json',
             'date': self._extract_date(date),
@@ -240,26 +240,26 @@ class Browse(Common):
             'category': '',
             'duration': '',
             'thumbnail': thumbnail,
-            'thumbfile': thumbnail,
+            'thumbfile': thumbfile,
             'contentid': id,
         }
         # listitem
         labels = {
-            'title': pg['title'],
-            'plot': pg['description'],
-            'plotoutline': pg['description'],
-            'studio': pg['source'],
-            'date': self._convert_date(pg['date']),
+            'title': summary['title'],
+            'plot': summary['description'],
+            'plotoutline': summary['description'],
+            'studio': summary['source'],
+            'date': self._convert_date(summary['date']),
         }
-        listitem = xbmcgui.ListItem(pg['title'])
-        listitem.setArt({'icon': pg['thumbnail'], 'thumb': pg['thumbnail'], 'poster': pg['thumbnail']})
+        listitem = xbmcgui.ListItem(summary['title'])
+        listitem.setArt({'icon': summary['thumbfile'], 'thumb': summary['thumbfile'], 'poster': summary['thumbfile']})
         listitem.setInfo(type='video', infoLabels=labels)
         listitem.setProperty('IsPlayable', 'true')
         # context menu
         contextmenu = []
         contextmenu += [(self.STR(30938), 'Action(Info)')]  # 詳細情報
         contextmenu += self.smartlist.contextmenu(sys.argv[0], title, False)  # スマートリストに追加
-        contextmenu += self.downloader.contextmenu(item)  # ダウンロード追加/削除
+        contextmenu += self.downloader.contextmenu(summary, resolved=False)  # ダウンロード追加/削除
         contextmenu += [(self.STR(30936), 'Container.Update(%s,replace)' % sys.argv[0])]  # トップに戻る
         contextmenu += [(self.STR(30937), 'RunPlugin(%s?action=settings)' % sys.argv[0])]  # アドオン設定
         listitem.addContextMenuItems(contextmenu, replaceItems=True)

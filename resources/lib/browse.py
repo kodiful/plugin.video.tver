@@ -150,7 +150,8 @@ class Browse(Common):
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
 
     def play(self, id):
-        listitem = xbmcgui.ListItem(path=self._get_manifest(id))
+        url = self._get_manifest(id)
+        listitem = xbmcgui.ListItem(path=url)
         listitem.setProperty('IsPlayable', 'true')
         listitem.setMimeType('application/x-mpegurl')
         xbmcplugin.setResolvedUrl(handle=int(sys.argv[1]), succeeded=True, listitem=listitem)
@@ -371,7 +372,13 @@ class Browse(Common):
         # プレイバックJSONを取得
         # https://playback.api.streaks.jp/v1/projects/tver-ex/medias/ref:1589_1588_55861
         url = f'https://playback.api.streaks.jp/v1/projects/{projectID}/medias/ref:{videoRefID}'
-        buf = self.request(url, {'origin': 'https://tver.jp', 'referer': 'https://tver.jp'})
+        headers = {
+            'origin': 'https://tver.jp',
+            'referer': 'https://tver.jp',
+            'X-Streaks-Api-Key': 'dummy',
+            'User-Agent': 'Mozilla/5.0'
+        }
+        buf = self.request(url, headers)
         '''
         {
             "project_id": "tver-ex",

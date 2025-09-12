@@ -375,7 +375,7 @@ class Browse(Common):
         headers = {
             'origin': 'https://tver.jp',
             'referer': 'https://tver.jp',
-            'X-Streaks-Api-Key': 'dummy',
+            'X-Streaks-Api-Key': 'a4c9a504f7784cc4b30e9573d97406dd',
             'User-Agent': 'Mozilla/5.0'
         }
         buf = self.request(url, headers)
